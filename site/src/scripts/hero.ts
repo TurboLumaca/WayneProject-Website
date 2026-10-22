@@ -29,8 +29,9 @@ const fragment = /* glsl */ `
 
   void main() {
     vec2 p = (gl_FragCoord.xy - 0.5 * uRes) / uRes.y;
-    vec2 src = vec2(0.0, -0.78);
-    float ang = (uMouse.x - 0.5) * 0.5 + sin(uTime * 0.21) * 0.035;
+    // the beam leaves the Wayne Tower roof (right third of the skyline) and leans back over the title
+    vec2 src = vec2(0.25 * uRes.x / uRes.y, -0.78);
+    float ang = -0.14 + (uMouse.x - 0.5) * 0.4 + sin(uTime * 0.21) * 0.035;
     vec2 d = p - src;
     float a = atan(d.x, d.y) - ang;
     float r = length(d);
