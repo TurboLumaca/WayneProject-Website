@@ -1,0 +1,103 @@
+# Editor for the site, served at /admin. Saves commit straight to the repository.
+# Needs a GitHub login proxy: see CONTENT.md ("Editing from /admin").
+backend:
+  name: github
+  repo: TurboLumaca/WayneProject-Website
+  branch: main
+  # base_url: https://YOUR-OAUTH-PROXY.example.com   # set once the proxy exists
+
+# `npx decap-server` + `npm run dev` lets you try the editor locally without GitHub.
+local_backend: true
+
+media_folder: site/public/img
+public_folder: /img
+site_url: https://projectwayne.com
+
+collections:
+  - name: cases
+    label: Case Files
+    label_singular: Case File
+    folder: site/src/content/cases
+    extension: md
+    format: frontmatter
+    create: true
+    slug: '{{no}}-{{slug}}'
+    summary: '{{no}} · {{title}} · {{date}}'
+    sortable_fields: [no, title, year]
+    fields:
+      - { label: Number, name: no, widget: number, value_type: int, min: 1, hint: 'Shown as CASE 001. Keep it unique.' }
+      - { label: Title, name: title, widget: string }
+      - { label: Date shown, name: date, widget: string, hint: 'Free text, e.g. "Mar 30, 2025" or "Week 41"' }
+      - { label: Year, name: year, widget: select, options: [{ label: Year 1, value: 1 }, { label: Year 2, value: 2 }, { label: Year 3, value: 3 }], value_type: int }
+      - { label: Type, name: kind, widget: select, options: [{ label: Journal, value: journal }, { label: Monk Mode, value: monk }, { label: Video script, value: script }] }
+      - { label: Case closed (stamp), name: closed, widget: boolean, required: false, hint: 'Monk Modes that are over' }
+      - { label: Link to the full text, name: href, widget: string, hint: 'Full address, https://…' }
+      - { label: Excerpt, name: body, widget: text, required: false, hint: 'A few sentences in his own words. Leave empty if there is none.' }
+
+  - name: projects
+    label: Projects
+    label_singular: Project
+    folder: site/src/content/projects
+    extension: md
+    format: frontmatter
+    create: true
+    summary: '{{code}} · {{name}} · {{status}}'
+    sortable_fields: [order, name]
+    fields:
+      - { label: Order, name: order, widget: number, value_type: int, min: 1 }
+      - { label: Code, name: code, widget: string, hint: 'Short ID, e.g. MMA' }
+      - { label: Name, name: name, widget: string }
+      - { label: One line, name: text, widget: text }
+      - { label: Status, name: status, widget: string, hint: 'Active, Training, Studying, Paused…' }
+      - { label: Progress (0 to 1), name: progress, widget: number, value_type: float, min: 0, max: 1, step: 0.01, required: false, hint: 'Only if there is a real number. Otherwise leave empty: no bar is drawn.' }
+      - { label: Progress label, name: progressLabel, widget: string, required: false }
+      - { label: Original page, name: href, widget: string }
+      - { label: Page address (slug), name: slug, widget: string, required: false, hint: 'Fill in to give the project its own page at /projects/…' }
+      - { label: Kicker, name: kicker, widget: string, required: false }
+      - label: Facts
+        name: facts
+        widget: list
+        required: false
+        fields: [{ label: Label, name: label, widget: string }, { label: Value, name: value, widget: string }]
+      - { label: Log title, name: logTitle, widget: string, required: false }
+      - label: Log
+        name: log
+        widget: list
+        required: false
+        fields: [{ label: Date, name: date, widget: string }, { label: Who, name: who, widget: string }, { label: Text, name: text, widget: text }]
+      - { label: Note titles, name: notes, widget: list, required: false, field: { label: Title, name: note, widget: string } }
+      - { label: Source page, name: source, widget: string, required: false }
+      - { label: Photo, name: img, widget: image, required: false, hint: 'Leave empty to draw the banner from the project data' }
+      - { label: Photo description, name: imgAlt, widget: string, required: false }
+      - label: Timeline
+        name: timeline
+        widget: list
+        required: false
+        fields:
+          - { label: Date, name: date, widget: string }
+          - { label: What happened, name: text, widget: string }
+          - { label: Stumble (red), name: miss, widget: boolean, required: false }
+      - label: Pre-assessments
+        name: preAssessments
+        widget: list
+        required: false
+        fields: [{ label: Subject, name: name, widget: string }, { label: Passed, name: passed, widget: boolean }]
+      - { label: Brief (one paragraph per blank line), name: body, widget: markdown, buttons: [bold, italic, link], editor_components: [], modes: [rich_text, raw] }
+
+  - name: numbers
+    label: Numbers
+    files:
+      - label: Numbers he updates by hand
+        name: live
+        file: site/src/data/live.json
+        format: json
+        fields:
+          - { label: YouTube subscribers, name: subscribers, widget: number, value_type: int }
+          - { label: Share of the $1.25M reached (0 to 1), name: fireProgress, widget: number, value_type: float, min: 0, max: 1, step: 0.01 }
+          - label: Pull-ups
+            name: pullups
+            widget: object
+            fields:
+              - { label: Per day, name: daily, widget: number, value_type: int }
+              - { label: 100 in (PR), name: pr, widget: string, hint: 'mm:ss' }
+              - { label: As of, name: since, widget: string }

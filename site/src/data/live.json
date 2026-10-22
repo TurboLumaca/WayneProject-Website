@@ -1,0 +1,9 @@
+{
+  "subscribers": 3900,
+  "fireProgress": 0.2,
+  "pullups": {
+    "daily": 100,
+    "pr": "26:00",
+    "since": "Jun 13, 2024"
+  }
+}

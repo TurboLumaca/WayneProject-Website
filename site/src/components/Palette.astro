@@ -1,6 +1,6 @@
 ---
 import { slugForCode } from '../data/projects';
-import { floors, years, cases, projects, financeGuides, influences, research, phases } from '../data/wayne';
+import { running, floors, years, cases, projects, financeGuides, influences, research, phases } from '../data/wayne';
 
 // One flat index for the ⌘K "Wayne/OS" palette. Every entry points at a page
 // and an anchor so the elevator can ride there.
@@ -26,7 +26,7 @@ const index = [
   ...projects.map((p) => ({ t: p.name, s: `${p.code} · ${p.status}`, k: 'Project', h: slugForCode(p.code) ? `/projects/${slugForCode(p.code)}` : `/cave#p-${p.code}`, f: 'cave' })),
   { t: 'The Forum', s: 'Latest posts and reader feedback', k: 'Space', h: '/forum', f: 'archive' },
   { t: 'Pull-up record grid', s: '10,000 dots, one per rep', k: 'Data', h: '/cave#pullups', f: 'cave' },
-  { t: 'Running log', s: '1,819.5 miles · 531 runs', k: 'Data', h: '/cave#running', f: 'cave' },
+  { t: 'Running log', s: `${running.totalMiles.toLocaleString('en-US')} miles · ${running.runs} runs`, k: 'Data', h: '/cave#running', f: 'cave' },
 ];
 ---
 

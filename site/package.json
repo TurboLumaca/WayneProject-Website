@@ -6,7 +6,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "fetch:sheets": "node scripts/fetch-sheets.mjs",
+    "prebuild": "node scripts/fetch-sheets.mjs"
   },
   "dependencies": {
     "astro": "^5.18.2",

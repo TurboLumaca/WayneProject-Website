@@ -1,0 +1,50 @@
+---
+order: 3
+code: "RE-LIC"
+name: "Real Estate Investing"
+text: "Represent himself in deals to grow the portfolio."
+status: "Licensed"
+progress: 1
+progressLabel: "License earned"
+href: "https://projectwayne.com/real-estate/"
+slug: "real-estate"
+kicker: "Ongoing project"
+facts:
+  - label: "Status"
+    value: "License earned"
+  - label: "Pre-licensing exam"
+    value: "Passed, June 24, 2024"
+  - label: "Next"
+    value: "VA loan + 1031 exchanges"
+logTitle: "Journal"
+log:
+  - date: "April 29, 2024"
+    who: "Project Wayne"
+    text: "Finished the real estate course about a week ago. Just need to do the final test in person and then the state exam. Have a couple of goals to work on now: 1 – Working on getting experience in the industry so that I know what I’m doing, 2 – Work on building up more capital to invest, and 3 – Finishing off the final two exams so I’m fully licensed."
+  - date: "June 14, 2024"
+    who: "Project Wayne"
+    text: "Have the real estate course final exam scheduled for later this month, will be cramming the week before and then trying to figure out the next steps towards the state exam."
+  - date: "June 26, 2024"
+    who: "Project Wayne"
+    text: "UPDATE FROM 6/24 – took and passed the pre-licensing exam. Pretty much forgot about it until the night before but was feeling pretty confident anyway. Studied a Quizlet on the ‘learn’ mode and got an 86%. Need to work out the details but broadly plan to take the state exam before mid-September."
+  - date: "September 20, 2024"
+    who: "Bruce Wayne"
+    text: "Was supposed to take the state license exam a week ago. Logged into the site the morning of an realized It passed a month ago, I leave for the army soon so I don’t have any time to reschedule. I’ll have to work out some time to take it in the future. Annoyed at myself for messing up like this, as there is not convenient time when I return. The best time to have taken it was now."
+  - date: "March 30, 2025"
+    who: "Bruce Wayne"
+    text: "UPDATE 3/30/25 – Passed the real estate license exam a month or so ago. It’s useless at the moment, however. I’ve continued to put together some plans in the background to take advantage of the VA loan and 1031 exchanges to build my real estate portfolio. These should start to take effect in around March-April of 2026."
+source: "https://projectwayne.com/real-estate/"
+img: "/img/batcave.jpg"
+imgAlt: "The Batcave computer, from the original site header"
+timeline:
+  - date: "Apr 2024"
+    text: "Course finished"
+  - date: "Jun 24, 2024"
+    text: "Pre-licensing exam passed"
+  - date: "Sep 2024"
+    text: "State exam date missed"
+    miss: true
+  - date: "early 2025"
+    text: "License exam passed"
+---
+Learning as much as possible about real estate investing, including earning a real estate license, with the aim of representing myself in deals to expand my investment portfolio.

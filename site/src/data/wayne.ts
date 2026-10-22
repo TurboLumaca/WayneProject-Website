@@ -1,3 +1,7 @@
+import { getCollection } from 'astro:content';
+import liveData from './live.json';
+import runningData from './running.json';
+
 // All content is taken from projectwayne.com (read 2026-10-22) and its public
 // Google Sheets. Nothing here is invented: where the site gives no number,
 // the UI shows a status instead of a progress bar.
@@ -91,7 +95,7 @@ export const floors: Floor[] = [
     mood: 'Under the manor. Water, stone, one light.',
     rooms: [
       { id: 'training', label: 'Training Floor', blurb: '10,000 pull-ups, one dot each', anchor: '#pullups' },
-      { id: 'track', label: 'The Track', blurb: '1,819.5 miles logged', anchor: '#running' },
+      { id: 'track', label: 'The Track', blurb: 'Miles logged, run by run', anchor: '#running' },
       { id: 'workshop', label: 'Workshop', blurb: 'Eight active projects', anchor: '#projects' },
       { id: 'console', label: 'Command Console', blurb: 'Time management systems', anchor: '#system' },
     ],
@@ -242,7 +246,7 @@ export const influences = [
 ];
 
 export const channels = [
-  { name: 'YouTube', handle: '3,900 subscribers', href: 'https://www.youtube.com/channel/UCSBUbi9s8nTe5OR_otTaFMA' },
+  { name: 'YouTube', handle: `${liveData.subscribers.toLocaleString('en-US')} subscribers`, href: 'https://www.youtube.com/channel/UCSBUbi9s8nTe5OR_otTaFMA' },
   { name: 'Reddit', handle: 'r/becomingbatman', href: 'https://www.reddit.com/r/becomingbatman/' },
   { name: 'Goodreads', handle: 'A book a day', href: 'https://www.goodreads.com/user/show/179578197-bruce-wayne' },
   { name: 'TikTok', handle: '@projectwayne1', href: 'https://www.tiktok.com/@projectwayne1' },
@@ -260,55 +264,38 @@ export interface CaseFile {
   href: string;
 }
 
-const N = `${ORIGIN}/notes-observations`;
-export const cases: CaseFile[] = [
-  { no: 1, title: 'Taking Up the Reins', date: 'Nov 15, 2022', year: 1, kind: 'journal', excerpt: 'Already work out a lot, both with weights, running, rucks. Going to begin learning Chinese soon. The first skill I’ll try to tackle is lockpicking.', href: `${N}/year-1/tuesday-november-15th-2022/` },
-  { no: 2, title: 'Wednesday, April 19th, 2023', date: 'Apr 19, 2023', year: 1, kind: 'journal', href: `${N}/year-1/wednesday-april-19th-2023/` },
-  { no: 3, title: 'Thursday, June 29th, 2023', date: 'Jun 29, 2023', year: 1, kind: 'journal', href: `${N}/year-1/thursday-june-29th-2023/` },
-  { no: 4, title: 'Tuesday, September 19th, 2023', date: 'Sep 19, 2023', year: 1, kind: 'journal', href: `${N}/year-1/tuesday-september-19th-2023/` },
-  { no: 5, title: 'Tuesday, October 24th, 2023', date: 'Oct 24, 2023', year: 1, kind: 'journal', href: `${N}/year-1/tuesday-october-24th-2023/` },
-  { no: 6, title: 'Thursday, November 9th, 2023', date: 'Nov 9, 2023', year: 1, kind: 'journal', href: `${N}/year-1/thursday-november-9th-2023/` },
-  { no: 7, title: 'November', date: 'Nov 2023', year: 2, kind: 'journal', href: `${N}/year-2/november/` },
-  { no: 8, title: 'Monk Mode 2', date: 'Mar 3 – May 13, 2024', year: 2, kind: 'monk', closed: true, excerpt: 'The second Monk Mode of Year Two: March 3rd to May 13th.', href: `${N}/year-2/monk-mode-2-march-3rd-may-13th/` },
-  { no: 9, title: 'June', date: 'Jun 2024', year: 2, kind: 'journal', excerpt: 'Ten entries. On June 13th he was training at 100 pull-ups a day.', href: `${N}/year-2/june/` },
-  { no: 10, title: 'July', date: 'Jul 2024', year: 2, kind: 'journal', href: `${N}/year-2/july/` },
-  { no: 11, title: 'Monk Mode 3', date: 'Jul 25 – Sep 20, 2024', year: 2, kind: 'monk', closed: true, excerpt: 'I was previously working 80 hours a week… This only left me with around four hours each day to sleep, workout, run, and build my other business ventures.', href: `${N}/year-2/monk-mode-3-july-25th-sept-20th/` },
-  { no: 12, title: 'Sunday, January 5th', date: 'Jan 5, 2025', year: 3, kind: 'journal', href: `${N}/year-2-copyyear-3/sunday-january-5th/` },
-  { no: 13, title: 'Sunday, March 30th', date: 'Mar 30, 2025', year: 3, kind: 'journal', excerpt: 'When you’re younger, people focus on seeing your potential but as you get older, they only care about your results.', href: `${N}/year-2-copyyear-3/sunday-march-30th/` },
-  ...[16, 17, 18, 19, 20, 21, 23, 24, 28, 30, 31, 34, 35, 38, 40, 41].map((w, i) => ({
-    no: 14 + i,
-    title: w === 35 ? 'Year 3: Weeks 35 & 36' : `Year 3: Week ${w}`,
-    date: `Week ${w}`,
-    year: 3 as const,
-    kind: 'script' as const,
-    href: `${ORIGIN}/youtube/`,
-  })),
-];
+// Journal entries, Monk Modes and video scripts live in src/content/cases/*.md
+// (editable from /admin). Loaded once at build time, newest number last.
+export const cases: CaseFile[] = (await getCollection('cases'))
+  .map((e) => ({ ...e.data, excerpt: e.body?.trim() || undefined }))
+  .sort((a, b) => a.no - b.no);
+
+// Numbers he updates by hand: src/data/live.json (edited in /admin).
+export const live = liveData as {
+  subscribers: number;
+  fireProgress: number;
+  pullups: { daily: number; pr: string; since: string };
+};
 
 export const pullups = {
   record: 10000,
-  daily: 100,
-  pr: '26:00',
-  pace: '6.94 / min',
+  daily: live.pullups.daily,
+  pr: live.pullups.pr,
+  pace: '6.94 / min', // 10,000 in 24 hours
   paceNote: '100 every 14:41, for 24 hours',
-  since: 'Jun 13, 2024', // the site says "as of", not "started"
+  since: live.pullups.since, // the site says "as of", not "started"
   quote: 'Despite doing them every back workout, after four years of working out I couldn’t do more than 10.',
 };
 
-// Monthly miles from the public running sheet (Jul 2024 – Aug 2026).
-export const running = {
-  totalMiles: 1819.5,
-  runs: 531,
-  longest: 26.22,
-  avgPace: '10:48',
-  fiveMilePR: '34:21',
-  months: [
-    ['2024-07', 7.5], ['2024-08', 44], ['2024-09', 29.1], ['2024-10', 77.8], ['2024-11', 108.7], ['2024-12', 90.9],
-    ['2025-01', 105.8], ['2025-02', 60.3], ['2025-03', 62.2], ['2025-04', 42.6], ['2025-05', 27.4], ['2025-06', 41.1],
-    ['2025-07', 95.1], ['2025-08', 41.8], ['2025-09', 81.5], ['2025-10', 139.2], ['2025-11', 109.2], ['2025-12', 103.8],
-    ['2026-01', 52.6], ['2026-02', 4], ['2026-03', 21.9], ['2026-04', 85.2], ['2026-05', 105.9], ['2026-06', 87.5],
-    ['2026-07', 84.9], ['2026-08', 109.4],
-  ] as [string, number][],
+// Refreshed from the public running sheet by scripts/fetch-sheets.mjs. Not edited by hand.
+export const running = runningData as {
+  updated: string;
+  totalMiles: number;
+  runs: number;
+  longest: number;
+  avgPace: string;
+  fiveMilePR: string;
+  months: [string, number][];
 };
 
 export interface Project {
@@ -321,16 +308,10 @@ export interface Project {
   href: string;
 }
 
-export const projects: Project[] = [
-  { code: 'FIN-30', name: 'Financial Independence by 30', text: 'Save $1,250,000 by age 30, free to take whatever job he wants.', status: 'Active', progress: 0.2, progressLabel: '1/5 of goal', href: `${ORIGIN}/projects/` },
-  { code: 'PULL-24', name: 'World Record in Pull-Ups', text: 'Most pull-ups in 24 hours. Target: 10,000.', status: 'Training', progress: 0.01, progressLabel: '100 / day', href: `${ORIGIN}/project-feynman/world-record-in-pull-ups/` },
-  { code: 'RE-LIC', name: 'Real Estate Investing', text: 'Represent himself in deals to grow the portfolio.', status: 'Licensed', progress: 1, progressLabel: 'License earned', href: `${ORIGIN}/real-estate/` },
-  { code: 'CPA', name: 'Certified Public Accountant', text: 'Understand the financials of a company before starting one.', status: 'Studying', href: `${ORIGIN}/certified-public-accountant/` },
-  { code: 'BS-CS', name: 'B.S. Computer Science', text: 'A skill Bruce Wayne would master, and leverage for overemployment.', status: 'In progress', href: `${ORIGIN}/b-s-computer-science/` },
-  { code: 'MMA', name: 'Mixed Martial Arts', text: 'Training since August 2025.', status: 'Training', href: `${ORIGIN}/mma/` },
-  { code: 'BOOK-1', name: 'A Book a Day', text: 'One audiobook every day, tracked on Goodreads.', status: 'Daily', href: `${ORIGIN}/projects/listening-to-a-book-a-day/` },
-  { code: 'FEYN', name: 'Project Feynman', text: 'Anyone can become skilled at anything. SAT division cancelled.', status: 'Paused', href: `${ORIGIN}/project-feynman/` },
-];
+// One file per project in src/content/projects/*.md
+export const projects: Project[] = (await getCollection('projects'))
+  .sort((a, b) => a.data.order - b.data.order)
+  .map(({ data: d }) => ({ code: d.code, name: d.name, text: d.text, status: d.status, progress: d.progress, progressLabel: d.progressLabel, href: d.href }));
 
 export const tools = ['Google Calendar', 'Notion', 'Clockify', 'MyFitnessPal', 'Garmin Connect', 'Trello', 'Gmail'];
 

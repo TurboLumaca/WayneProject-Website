@@ -12,12 +12,14 @@ import {
   cases,
   pullups,
   running,
+  live,
   caveWall,
   PROJECT_START,
 } from '../data/wayne';
 
 const keyByYear = years.map((y) => ({ ...y, key: y.items.filter((i) => i.key).map((i) => i.text) }));
 const featured = [cases[0], cases.find((c) => c.no === 8)!, cases.find((c) => c.no === 11)!];
+const fireLabel = `${Math.round(live.fireProgress * 100)}%`;
 const max = Math.max(...running.months.map((m) => m[1]));
 const bestMonth = running.months.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
 ---
@@ -42,7 +44,7 @@ const bestMonth = running.months.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
         <span class="ht-line"><span><em>Bruce Wayne?</em></span></span>
       </h1>
       <p class="hero-sub" data-hero-fade>
-        Day one was November 15, 2022: lockpicking first, Chinese soon. Since then, two degrees, Army IBOLC, a deployment, a Combat Infantry Badge and 1,819.5 miles on foot.
+        Day one was November 15, 2022: lockpicking first, Chinese soon. Since then, two degrees, Army IBOLC, a deployment, a Combat Infantry Badge and {running.totalMiles.toLocaleString('en-US')} miles on foot.
       </p>
       <div class="hero-cta" data-hero-fade>
         <a class="btn btn--solid" href="#manifesto" data-scroll>Enter the project <span class="arrow">↓</span></a>
@@ -53,8 +55,8 @@ const bestMonth = running.months.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
     <p class="hero-ledger mono wrap" data-hero-fade>
       <span>{running.totalMiles.toLocaleString('en-US')} mi run</span>
       <span>{pullups.daily} pull-ups a day</span>
-      <span>1/5 of $1.25M</span>
-      <span>3,900 subscribers</span>
+      <span>{fireLabel} of $1.25M</span>
+      <span>{live.subscribers.toLocaleString('en-US')} subscribers</span>
     </p>
   </section>
 
@@ -113,9 +115,9 @@ const bestMonth = running.months.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
         <div class="fire" data-reveal>
           <p class="eyebrow">Target by age 30</p>
           <p class="display fire-n">$<span data-count="1250000">1,250,000</span></p>
-          <p class="fire-sub">Financial independence, retire early. Already a fifth of the way there.</p>
-          <div class="fire-bar" aria-hidden="true"><span data-fire-bar></span></div>
-          <p class="mono fire-bar-l"><span>$0</span><span>1/5 reached</span><span>$1.25M</span></p>
+          <p class="fire-sub">Financial independence, retire early. Already {fireLabel} of the way there.</p>
+          <div class="fire-bar" aria-hidden="true"><span data-fire-bar data-fire={live.fireProgress}></span></div>
+          <p class="mono fire-bar-l"><span>$0</span><span>{fireLabel} reached</span><span>$1.25M</span></p>
         </div>
 
         <div class="phases">
@@ -420,7 +422,7 @@ const bestMonth = running.months.reduce((a, b) => (b[1] > a[1] ? b : a))[0];
     }
 
     /* FIRE bar */
-    gsap.fromTo('[data-fire-bar]', { scaleX: 0 }, { scaleX: 0.2, duration: 2, ease: 'expo.out', scrollTrigger: { trigger: '[data-fire-bar]', start: 'top 90%', once: true } });
+    gsap.fromTo('[data-fire-bar]', { scaleX: 0 }, { scaleX: Number($('[data-fire-bar]').dataset.fire), duration: 2, ease: 'expo.out', scrollTrigger: { trigger: '[data-fire-bar]', start: 'top 90%', once: true } });
 
     /* Cave: torch, pull-up grid, running bars */
     initTorch($('[data-torch]'));
