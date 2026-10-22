@@ -412,6 +412,9 @@ html[data-theme='bruce'] .grain {
   z-index: 0;
   pointer-events: none;
   opacity: 0;
+  /* set from suit-scene.ts so the chest fades into the page around its edges */
+  -webkit-mask-image: radial-gradient(ellipse var(--rx, 30%) var(--ry, 40%) at var(--cx, 78%) var(--cy, 50%), #000 55%, transparent 100%);
+  mask-image: radial-gradient(ellipse var(--rx, 30%) var(--ry, 40%) at var(--cx, 78%) var(--cy, 50%), #000 55%, transparent 100%);
 }
 main {
   position: relative;

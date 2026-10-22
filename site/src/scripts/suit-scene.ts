@@ -2,226 +2,369 @@ import {
   ACESFilmicToneMapping,
   AdditiveBlending,
   AmbientLight,
-  BoxGeometry,
+  BufferGeometry,
   CanvasTexture,
-  ConeGeometry,
   CylinderGeometry,
   DirectionalLight,
-  DoubleSide,
-  EdgesGeometry,
+  ExtrudeGeometry,
+  Float32BufferAttribute,
   Group,
   HemisphereLight,
   LatheGeometry,
-  LineBasicMaterial,
-  LineSegments,
   Mesh,
   MeshBasicMaterial,
+  MeshPhysicalMaterial,
   MeshStandardMaterial,
   PMREMGenerator,
   PerspectiveCamera,
-  PlaneGeometry,
-  PointLight,
-  RingGeometry,
+  RepeatWrapping,
   Scene,
+  Shape,
+  ShapeUtils,
   Sprite,
   SpriteMaterial,
-  SphereGeometry,
   Vector2,
+  Vector3,
   WebGLRenderer,
 } from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { gsap, isTouch, lenis } from './core';
+import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { gsap, isTouch } from './core';
 
 /**
- * An original armored vigilante, built from primitives: a lathe-turned torso,
- * segmented pauldrons and abs, a cowl with a brow and two ears, gauntlet
- * fins, and a pleated cape that reacts to scroll speed. Thin edge lines pick
- * out every plate in the dark. Stylised in the spirit of the tactical suits of
- * the 2005+ films; no emblem, no official model. Swap `buildFigure` for a
- * licensed glTF if you have one.
+ * The chest of an armored suit in the spirit of the Arkham Knight, built from
+ * code and traced over reference frames: the black sternum, ribbed panels and
+ * glossy side plates form one big bat across the chest, framed by domed navy
+ * plates (pectorals, shoulders, lower ribs). A slatted gorget with two blue
+ * lights sits on top. The camera moves through five shots, one per reference
+ * frame, in order as the page scrolls. Fan-made from primitives.
  */
 
 export type Pose = 'hero' | 'manifesto' | 'cases' | 'cave' | 'dim' | 'hidden';
 
-interface Target {
-  x: number;
-  rotY: number;
-  scale: number;
-  opacity: number;
+interface Shot {
+  y: number; // vertical offset of the chest centre
+  s: number; // scale (how close the shot is)
+  rx: number; // tilt: negative looks up at the chest from below
+  ry: number;
+  light: number; // key light multiplier
 }
 
-const POSES: Record<Pose, Target> = {
-  hero: { x: 1, rotY: -0.42, scale: 1, opacity: 1 },
-  manifesto: { x: 1, rotY: Math.PI + 0.3, scale: 1.04, opacity: 0.92 },
-  cases: { x: 1, rotY: 0.55, scale: 0.95, opacity: 0.36 },
-  cave: { x: 1, rotY: -0.32, scale: 1, opacity: 0.6 },
-  dim: { x: 1, rotY: 0.2, scale: 0.95, opacity: 0.14 },
-  hidden: { x: 1, rotY: 0, scale: 1, opacity: 0 },
+// one per reference frame, in file order (1 … 5)
+const SHOTS: Shot[] = [
+  { y: 0.02, s: 2.2, rx: -0.12, ry: 0, light: 1 },
+  { y: -0.06, s: 2.38, rx: -0.2, ry: 0.035, light: 0.78 },
+  { y: 0.05, s: 2.3, rx: -0.1, ry: -0.02, light: 1 },
+  { y: -0.3, s: 2.12, rx: 0.08, ry: 0, light: 0.95 },
+  { y: 0.12, s: 2.55, rx: -0.5, ry: 0.04, light: 0.7 },
+];
+
+// shot -1 keeps the current framing
+const POSES: Record<Pose, { shot: number; opacity: number }> = {
+  hero: { shot: 0, opacity: 1 },
+  manifesto: { shot: 1, opacity: 0.92 }, // then 1 → 2 with the manifesto's scroll progress
+  cases: { shot: 3, opacity: 0.4 },
+  cave: { shot: 4, opacity: 0.65 },
+  dim: { shot: -1, opacity: 0.14 },
+  hidden: { shot: -1, opacity: 0 },
 };
 
-function glowTexture() {
+const lerpShot = (i: number): Shot => {
+  const a = SHOTS[Math.floor(i)];
+  const b = SHOTS[Math.min(SHOTS.length - 1, Math.ceil(i))];
+  const f = i - Math.floor(i);
+  return { y: a.y + (b.y - a.y) * f, s: a.s + (b.s - a.s) * f, rx: a.rx + (b.rx - a.rx) * f, ry: a.ry + (b.ry - a.ry) * f, light: a.light + (b.light - a.light) * f };
+};
+
+function canvasTexture(size: number, paint: (g: CanvasRenderingContext2D, s: number) => void) {
   const c = document.createElement('canvas');
-  c.width = c.height = 64;
-  const g = c.getContext('2d')!;
-  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
-  grd.addColorStop(0, 'rgba(255,248,220,1)');
-  grd.addColorStop(0.25, 'rgba(255,230,160,0.55)');
-  grd.addColorStop(1, 'rgba(255,230,160,0)');
-  g.fillStyle = grd;
-  g.fillRect(0, 0, 64, 64);
-  return new CanvasTexture(c);
+  c.width = c.height = size;
+  paint(c.getContext('2d')!, size);
+  const t = new CanvasTexture(c);
+  t.wrapS = t.wrapT = RepeatWrapping;
+  return t;
 }
 
-function buildFigure() {
-  const suit = new MeshStandardMaterial({ color: 0x2a2e36, roughness: 0.52, metalness: 0.3, flatShading: true });
-  const plate = new MeshStandardMaterial({ color: 0x3a414d, roughness: 0.36, metalness: 0.55, flatShading: true });
-  const trim = new MeshStandardMaterial({ color: 0x4a5363, roughness: 0.42, metalness: 0.45, flatShading: true });
-  const eye = new MeshBasicMaterial({ color: 0xfff3cf });
-  const edgeMat = new LineBasicMaterial({ color: 0xa8bdf2, transparent: true, opacity: 0.3 });
+function glowTexture() {
+  return canvasTexture(64, (g) => {
+    const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grd.addColorStop(0, 'rgba(255,255,255,1)');
+    grd.addColorStop(0.25, 'rgba(255,255,255,0.5)');
+    grd.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = grd;
+    g.fillRect(0, 0, 64, 64);
+  });
+}
+
+// roughness map: satin base, clusters of glossy rain drops, a few dull scratches
+function wetTexture() {
+  return canvasTexture(256, (g, s) => {
+    g.fillStyle = 'rgb(165,165,165)';
+    g.fillRect(0, 0, s, s);
+    const drop = (x: number, y: number, r: number) => {
+      const v = 80 + Math.random() * 50;
+      g.fillStyle = `rgb(${v},${v},${v})`;
+      g.beginPath();
+      g.ellipse(x, y, r, r * (0.6 + Math.random() * 0.5), Math.random() * 3, 0, Math.PI * 2);
+      g.fill();
+    };
+    for (let c = 0; c < 5; c++) {
+      const cx = Math.random() * s;
+      const cy = Math.random() * s;
+      for (let i = 0; i < 35; i++) drop((cx + (Math.random() - 0.5) * 70 + s) % s, (cy + (Math.random() - 0.5) * 50 + s) % s, 1 + Math.random() * 3.5);
+    }
+    for (let i = 0; i < 120; i++) drop(Math.random() * s, Math.random() * s, 0.6 + Math.random() * 1.6);
+    g.strokeStyle = 'rgba(225,225,225,0.7)';
+    g.lineWidth = 0.7;
+    for (let i = 0; i < 30; i++) {
+      const x = Math.random() * s;
+      const y = Math.random() * s;
+      const a = -0.6 + Math.random() * 1.2;
+      const l = 10 + Math.random() * 40;
+      g.beginPath();
+      g.moveTo(x, y);
+      g.lineTo(x + Math.cos(a) * l, y + Math.sin(a) * l);
+      g.stroke();
+    }
+  });
+}
+
+// bump map: fine horizontal ribs for the armored undersuit
+function ribTexture() {
+  const t = canvasTexture(64, (g, s) => {
+    for (let y = 0; y < s; y++) {
+      const v = 128 + Math.sin((y / s) * Math.PI * 2 * 8) * 110;
+      g.fillStyle = `rgb(${v},${v},${v})`;
+      g.fillRect(0, y, s, 1);
+    }
+  });
+  t.repeat.set(1, 4);
+  return t;
+}
+
+/* ───── Chest surface: a barrel with an elliptical cross-section ───── */
+const PROF: [number, number][] = [
+  [0, -0.05], [0.62, -0.05], [0.66, 0.1], [0.72, 0.3], [0.775, 0.6], [0.77, 0.8], [0.76, 0.95], [0.7, 1.05], [0.56, 1.12], [0.36, 1.2], [0.2, 1.26], [0, 1.26],
+];
+const DEPTH = 0.55; // front-to-back depth relative to width
+const CENTRE = 0.62; // height of the chest centre
+
+const radiusAt = (y: number) => {
+  for (let i = 2; i < PROF.length - 1; i++) {
+    const [r1, y1] = PROF[i];
+    if (y <= y1) {
+      const [r0, y0] = PROF[i - 1];
+      return r0 + ((r1 - r0) * (y - y0)) / (y1 - y0 || 1);
+    }
+  }
+  return PROF[PROF.length - 2][0];
+};
+
+// front-view coordinates (X, Y, h above the surface) -> point on the chest
+const onChest = (X: number, y: number, h: number, out = new Vector3()) => {
+  const r = radiusAt(y);
+  const a = Math.asin(Math.max(-0.995, Math.min(0.995, X / r)));
+  return out.set(Math.sin(a) * (r + h), y, Math.cos(a) * (r * DEPTH + h));
+};
+
+/*
+ * Outlines are traced in pixels over the frontal reference frame (3.webp,
+ * 2000 × 1166, chest centred on x = 1030); P maps a pixel to front-view chest
+ * coordinates.
+ */
+const K = 0.00079;
+const P = (x: number, y: number): [number, number] => [(x - 1030) * K, 1 - (y - 135) * K];
+type Cmd = [number, number] | [number, number, number, number];
+
+const shapeOf = (cmds: Cmd[]) => {
+  const s = new Shape();
+  s.moveTo(...P(cmds[0][0], cmds[0][1]));
+  for (const c of cmds.slice(1)) {
+    if (c.length === 2) s.lineTo(...P(c[0], c[1]));
+    else s.quadraticCurveTo(...P(c[0], c[1]), ...P(c[2], c[3]));
+  }
+  s.closePath();
+  return s;
+};
+const trace = (cmds: Cmd[], divisions = 72) => {
+  const pts = shapeOf(cmds).getSpacedPoints(divisions);
+  if (pts[0].distanceTo(pts[pts.length - 1]) < 1e-6) pts.pop();
+  return pts;
+};
+const mirror = (pts: Vector2[]) => pts.map((p) => new Vector2(-p.x, p.y));
+
+/**
+ * A domed armor plate draped on the chest: rings shrink from the outline to the
+ * centre, rising in a quarter-round bevel then a soft dome, so the plate reads
+ * as a thick moulded piece with rounded edges (no flat caps).
+ */
+function chestPlate(pts: Vector2[], { t = 0.04, dome = 0.012, edge = 0.09, lift = 0 } = {}) {
+  const ring = ShapeUtils.isClockWise(pts) ? [...pts].reverse() : pts;
+  const n = ring.length;
+  const c = ring.reduce((a, p) => a.add(p), new Vector2()).divideScalar(n);
+  const RINGS = 12;
+  const pos: number[] = [];
+  const uv: number[] = [];
+  const v = new Vector3();
+  const push = (x: number, y: number, h: number) => {
+    onChest(x, y, lift + h, v);
+    pos.push(v.x, v.y, v.z);
+    uv.push(x * 2.5, y * 2.5);
+  };
+  push(c.x, c.y, t + dome);
+  for (let r = 1; r <= RINGS; r++) {
+    const k = r / RINGS;
+    let s: number;
+    let h: number;
+    if (k <= 0.5) {
+      const q = k / 0.5;
+      s = q * (1 - edge);
+      h = t + dome * (1 - q * q);
+    } else {
+      const phi = ((k - 0.5) / 0.5) * (Math.PI / 2);
+      s = 1 - edge + edge * Math.sin(phi);
+      h = r === RINGS ? -0.015 : t * Math.cos(phi);
+    }
+    for (const p of ring) push(c.x + (p.x - c.x) * s, c.y + (p.y - c.y) * s, h);
+  }
+  const idx: number[] = [];
+  for (let i = 0; i < n; i++) idx.push(0, 1 + i, 1 + ((i + 1) % n));
+  for (let r = 1; r < RINGS; r++) {
+    const a = 1 + (r - 1) * n;
+    const b = 1 + r * n;
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n;
+      idx.push(a + i, b + i, b + j, a + i, b + j, a + j);
+    }
+  }
+  const g = new BufferGeometry();
+  g.setAttribute('position', new Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new Float32BufferAttribute(uv, 2));
+  g.setIndex(idx);
+  g.computeVertexNormals();
+  return g;
+}
+
+// a crisp bevelled relief for shapes a dome can't follow (the bat head's ears)
+function chestRelief(cmds: Cmd[], { depth = 0.025, bevel = 0.01, lift = 0 } = {}) {
+  const g = new ExtrudeGeometry(shapeOf(cmds), { depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel * 0.6, bevelSegments: 2, curveSegments: 8 });
+  const p = g.attributes.position;
+  const v = new Vector3();
+  for (let i = 0; i < p.count; i++) {
+    onChest(p.getX(i), p.getY(i), lift + p.getZ(i), v);
+    p.setXYZ(i, v.x, v.y, v.z);
+  }
+  g.computeVertexNormals();
+  return g;
+}
+
+// right-hand plates, traced over 3.webp
+const PLATES = {
+  pec: [[1150, 560], [1130, 470, 1170, 420], [1210, 345, 1300, 320], [1490, 300], [1560, 300, 1560, 380], [1555, 470], [1550, 560, 1470, 580], [1250, 610], [1160, 620, 1150, 560]],
+  ribbed: [[1160, 610], [1540, 585], [1545, 820], [1230, 845], [1190, 845, 1185, 810]],
+  wing: [[1545, 330], [1740, 325], [1900, 380, 1960, 625], [1790, 650, 1700, 830], [1560, 840]],
+  shoulder: [[1500, 330], [1500, 215], [1540, 160, 1650, 150], [1780, 150], [1950, 180, 1990, 380], [1992, 600], [1962, 622], [1900, 375, 1740, 322], [1545, 326]],
+  flank: [[1700, 840], [1790, 660, 1965, 640], [1995, 800, 1940, 900], [1860, 1030, 1700, 1060], [1640, 1040], [1650, 860]],
+  lowRib: [[1120, 945], [1150, 880, 1260, 860], [1600, 840], [1640, 845, 1635, 900], [1620, 1030], [1400, 1060, 1200, 1000], [1120, 975, 1120, 945]],
+  trap: [[1170, 330], [1180, 265], [1545, 150], [1555, 210], [1500, 300], [1300, 322]],
+  collarbone: [[1118, 342], [1180, 330], [1150, 560], [1140, 615], [1080, 615], [1110, 560], [1112, 480]],
+  frame: [[1072, 615], [1150, 605], [1185, 845], [1120, 950], [1068, 1000]],
+} satisfies Record<string, Cmd[]>;
+
+function buildChest() {
+  const wet = wetTexture();
+  const rib = ribTexture();
+  const armor = new MeshPhysicalMaterial({ color: 0x2a3a4c, roughness: 0.82, roughnessMap: wet, metalness: 0.28, clearcoat: 1, clearcoatRoughness: 0.18 });
+  const armorPale = new MeshPhysicalMaterial({ color: 0x37485a, roughness: 0.86, roughnessMap: wet, metalness: 0.22, clearcoat: 0.8, clearcoatRoughness: 0.24 });
+  const gloss = new MeshPhysicalMaterial({ color: 0x090d14, roughness: 0.5, roughnessMap: wet, metalness: 0.5, clearcoat: 1, clearcoatRoughness: 0.05 });
+  const under = new MeshStandardMaterial({ color: 0x111720, roughness: 0.7, metalness: 0.3, bumpMap: rib, bumpScale: 1.6 });
+  const steel = new MeshPhysicalMaterial({ color: 0x5b6d88, roughness: 0.28, metalness: 0.75, clearcoat: 1, clearcoatRoughness: 0.1 });
+  const tab = new MeshBasicMaterial({ color: 0xe8f3ff });
+  const led = new MeshBasicMaterial({ color: 0x9fdcff });
+  const glow = glowTexture();
 
   const root = new Group();
-  const body = new Group();
-  root.add(body);
+  const chest = new Group();
+  chest.position.y = -CENTRE;
+  root.add(chest);
 
-  // mesh + faint edge lines so every plate reads against the dark
-  const mk = (parent: Group, geo: any, mat: any, x = 0, y = 0, z = 0, edges = true) => {
+  const mk = (geo: BufferGeometry, mat: any, x = 0, y = 0, z = 0) => {
     const m = new Mesh(geo, mat);
     m.position.set(x, y, z);
-    parent.add(m);
-    if (edges) m.add(new LineSegments(new EdgesGeometry(geo, 30), edgeMat));
+    chest.add(m);
     return m;
   };
-
-  /* ───── Legs: heavy thighs, angular knee guards, boots with a toe wedge ───── */
-  const legs: Group[] = [];
-  for (const side of [-1, 1]) {
-    const leg = new Group();
-    leg.position.set(side * 0.25, -0.24, 0);
-    leg.rotation.z = side * 0.07;
-    leg.rotation.x = side < 0 ? -0.07 : 0.06; // weight on one leg
-    mk(leg, new CylinderGeometry(0.2, 0.15, 0.84, 7), suit, 0, -0.5, 0);
-    mk(leg, new BoxGeometry(0.2, 0.2, 0.06), trim, 0, -0.94, 0.15).rotation.x = -0.35; // knee guard
-    mk(leg, new SphereGeometry(0.15, 7, 5), plate, 0, -0.96, 0.02).scale.set(1, 0.7, 1.05);
-    mk(leg, new CylinderGeometry(0.15, 0.11, 0.76, 7), plate, 0, -1.34, 0);
-    mk(leg, new BoxGeometry(0.06, 0.5, 0.2), trim, side * 0.13, -1.3, 0.03); // greave rail
-    mk(leg, new BoxGeometry(0.29, 0.28, 0.5), trim, 0, -1.65, 0.08);
-    const toe = mk(leg, new BoxGeometry(0.27, 0.1, 0.22), plate, 0, -1.76, 0.3);
-    toe.rotation.x = -0.22;
-    body.add(leg);
-    legs.push(leg);
-  }
-
-  /* ───── Belt ───── */
-  mk(body, new BoxGeometry(0.76, 0.17, 0.42), trim, 0, -0.16, 0);
-  mk(body, new BoxGeometry(0.15, 0.13, 0.05), plate, 0, -0.16, 0.23);
-  for (const x of [-0.31, -0.19, 0.19, 0.31]) mk(body, new BoxGeometry(0.1, 0.14, 0.1), plate, x, -0.16, 0.22);
-
-  /* ───── Torso: a V-taper turned on a lathe, ringed abs, pectoral wedges ───── */
-  const torso = new Group();
-  body.add(torso);
-  const prof = [
-    [0, -0.1], [0.27, -0.1], [0.3, 0.12], [0.38, 0.42], [0.51, 0.78], [0.58, 1.06], [0.5, 1.24], [0.2, 1.3], [0, 1.3],
-  ].map(([r, y]) => new Vector2(r, y));
-  const core = mk(torso, new LatheGeometry(prof, 8), suit, 0, 0, 0);
-  core.scale.z = 0.58;
-  core.rotation.y = Math.PI / 8;
-  for (let i = 0; i < 3; i++) {
-    const ring = mk(torso, new CylinderGeometry(0.325 + i * 0.045, 0.325 + i * 0.045, 0.055, 8), i === 1 ? plate : trim, 0, i * 0.17, 0);
-    ring.scale.z = 0.6;
-    ring.rotation.y = Math.PI / 8;
-  }
-  for (const side of [-1, 1]) {
-    const pec = mk(torso, new BoxGeometry(0.34, 0.3, 0.12), plate, side * 0.2, 0.86, 0.255);
-    pec.rotation.set(-0.22, side * 0.1, side * -0.1);
-  }
-  mk(torso, new BoxGeometry(0.06, 0.52, 0.05), trim, 0, 0.78, 0.3);
-
-  /* ───── Shoulders: three-layer segmented pauldrons ───── */
-  for (const side of [-1, 1]) {
-    for (let i = 0; i < 3; i++) {
-      const s = mk(torso, new SphereGeometry(0.255 - i * 0.025, 8, 4, 0, Math.PI * 2, 0, Math.PI / 2), i === 0 ? trim : plate, side * 0.67, 1.16 - i * 0.075, 0);
-      s.scale.set(1.2, 0.62, 1.1);
-      s.rotation.z = side * -0.32;
-    }
-  }
-  mk(torso, new CylinderGeometry(0.12, 0.16, 0.24, 7), suit, 0, 1.4, 0);
-
-  /* ───── Head: cowl, brow, jaw, long ears, glowing slits ───── */
-  const head = new Group();
-  head.position.set(0, 1.68, 0.01);
-  torso.add(head);
-  const cowl = mk(head, new SphereGeometry(0.27, 10, 8), suit, 0, 0, 0);
-  cowl.scale.set(0.9, 1.12, 1);
-  mk(head, new CylinderGeometry(0.2, 0.125, 0.24, 6), trim, 0, -0.17, 0.06).rotation.y = Math.PI / 6;
-  const glow = glowTexture();
-  for (const side of [-1, 1]) {
-    const ear = mk(head, new ConeGeometry(0.07, 0.46, 4), suit, side * 0.135, 0.38, -0.03);
-    ear.rotation.z = side * -0.15;
-    ear.rotation.x = -0.12;
-    mk(head, new BoxGeometry(0.17, 0.042, 0.17), trim, side * 0.1, 0.125, 0.2).rotation.z = side * 0.28; // brow, inner end down
-    const slit = mk(head, new BoxGeometry(0.105, 0.024, 0.012), eye, side * 0.092, 0.07, 0.258, false);
-    slit.rotation.z = side * 0.3;
-    const halo = new Sprite(new SpriteMaterial({ map: glow, color: 0xffeeb8, blending: AdditiveBlending, transparent: true, opacity: 0.85, depthWrite: false }));
-    halo.position.set(side * 0.092, 0.07, 0.28);
-    halo.scale.setScalar(0.2);
-    head.add(halo);
-  }
-
-  /* ───── Arms: segmented upper arm, elbow guard, gauntlet with fins ───── */
-  const arms: { upper: Group; fore: Group; side: number; baseZ: number; baseX: number }[] = [];
-  for (const side of [-1, 1]) {
-    const upper = new Group();
-    upper.position.set(side * 0.74, 1.08, 0);
-    const baseZ = side * (side < 0 ? 0.3 : 0.5);
-    upper.rotation.z = baseZ;
-    mk(upper, new CylinderGeometry(0.12, 0.095, 0.6, 7), suit, 0, -0.3, 0);
-    const fore = new Group();
-    fore.position.set(0, -0.6, 0);
-    const baseX = side < 0 ? -0.2 : -0.55; // one arm hangs, the other is bent forward
-    fore.rotation.x = baseX;
-    fore.rotation.z = side * 0.08;
-    mk(fore, new SphereGeometry(0.11, 6, 5), plate, 0, 0, -0.01);
-    mk(fore, new CylinderGeometry(0.098, 0.13, 0.54, 7), plate, 0, -0.31, 0);
-    for (let i = 0; i < 3; i++) {
-      const fin = mk(fore, new BoxGeometry(0.02, 0.18, 0.12), trim, side * 0.145, -0.2 - i * 0.1, 0);
-      fin.rotation.z = side * 0.6;
-    }
-    mk(fore, new BoxGeometry(0.17, 0.2, 0.2), suit, 0, -0.68, 0.01);
-    upper.add(fore);
-    torso.add(upper);
-    arms.push({ upper, fore, side, baseZ, baseX });
-  }
-
-  /* ───── Cape: collar + a cloth plane displaced every frame ───── */
-  for (const side of [-1, 1]) {
-    const c = mk(torso, new BoxGeometry(0.17, 0.42, 0.045), suit, side * 0.22, 1.46, -0.2, false);
-    c.rotation.set(-0.25, side * 0.2, side * -0.3);
-  }
-  const capeGeo = new PlaneGeometry(2.1, 3, 20, 28);
-  const cape = new Mesh(capeGeo, new MeshStandardMaterial({ color: 0x20232b, roughness: 0.86, metalness: 0.04, side: DoubleSide }));
-  cape.position.set(0, 1.32 - 1.5, -0.26);
-  torso.add(cape);
-  const base = Float32Array.from(capeGeo.attributes.position.array as Float32Array);
-
-  const updateCape = (t: number, sway: number, whip: number) => {
-    const pos = capeGeo.attributes.position as any;
-    const wind = Math.sin(t * 0.45) * 0.3 + 0.3 + whip * 1.2;
-    for (let i = 0; i < pos.count; i++) {
-      const bx = base[i * 3];
-      const by = base[i * 3 + 1];
-      const v = (1.5 - by) / 3; // 0 at the shoulders, 1 at the hem
-      const spread = 0.5 + 1.05 * Math.pow(v, 0.85);
-      const pleat = Math.sin(bx * 8.5 + t * 0.5) * 0.035 * v;
-      const flutter = (Math.sin(v * 4 + t * 1.7 + bx * 2.4) * 0.1 + Math.sin(t * 0.9 + bx * 3.1 + v * 1.4) * 0.05) * v * (1 + whip * 2.4);
-      const scallop = Math.pow(v, 4) * Math.max(0, Math.sin(bx * 7.2 + 0.6)) * 0.22;
-      pos.setXYZ(i, bx * spread + sway * v * 0.35 + wind * v * v * 0.55, by - scallop, -v * 0.5 - wind * 0.22 * v + pleat + flutter);
-    }
-    pos.needsUpdate = true;
-    capeGeo.computeVertexNormals();
+  const rbox = (w: number, h: number, d: number, r: number) => new RoundedBoxGeometry(w, h, d, 3, r);
+  const plate = (cmds: Cmd[], mat: any, opts: Parameters<typeof chestPlate>[1], both = true) => {
+    const pts = trace(cmds);
+    mk(chestPlate(pts, opts), mat);
+    if (both) mk(chestPlate(mirror(pts), opts), mat);
   };
-  updateCape(0, 0, 0);
 
-  return { root, body, torso, head, arms, legs, updateCape };
+  // ribbed core under everything
+  const core = mk(new LatheGeometry(PROF.map(([r, y]) => new Vector2(r, y)), 64), under);
+  core.scale.z = DEPTH;
+
+  /* ───── The bat: head and ears, sternum, ribbed panels, glossy wings ───── */
+  mk(chestRelief([[965, 415], [952, 500], [960, 580], [1000, 622], [1060, 622], [1100, 580], [1108, 500], [1095, 418], [1072, 468], [1030, 498], [988, 468]], { depth: 0.03, bevel: 0.012, lift: 0.02 }), gloss);
+  plate([[992, 610], [1068, 610], [1066, 1110], [994, 1110]], gloss, { t: 0.045, dome: 0.018, edge: 0.3 }, false);
+  plate(PLATES.collarbone, gloss, { t: 0.03, dome: 0.006, edge: 0.12, lift: -0.004 });
+  plate(PLATES.frame, gloss, { t: 0.03, dome: 0.006, edge: 0.12, lift: -0.004 });
+  plate(PLATES.ribbed, under, { t: 0.022, dome: 0.004, edge: 0.06, lift: -0.004 });
+  plate(PLATES.wing, gloss, { t: 0.05, dome: 0.02, edge: 0.08 });
+
+  /* ───── Navy plates around it ───── */
+  plate([[935, 340], [1125, 340], [1100, 410], [1075, 465], [1030, 492], [985, 465], [960, 410]], armor, { t: 0.04, dome: 0.008, edge: 0.12 }, false);
+  plate(PLATES.pec, armor, { t: 0.06, dome: 0.016, edge: 0.1 });
+  plate(PLATES.shoulder, armor, { t: 0.055, dome: 0.014, edge: 0.08, lift: -0.004 });
+  plate(PLATES.flank, armorPale, { t: 0.055, dome: 0.016, edge: 0.09 });
+  plate(PLATES.lowRib, armor, { t: 0.055, dome: 0.014, edge: 0.09 });
+  plate(PLATES.trap, gloss, { t: 0.04, dome: 0.008, edge: 0.1, lift: -0.008 });
+
+  for (const side of [-1, 1]) {
+    // white tabs where the wings meet the ribbed panels
+    for (const [x, y] of [[1540, 578], [1508, 792]]) {
+      const [X, Y] = P(1030 + side * (x - 1030), y);
+      const p = onChest(X, Y, 0.012);
+      const t = mk(rbox(0.012, 0.035, 0.012, 0.004), tab, p.x, p.y, p.z);
+      t.rotation.y = Math.atan2(p.x, p.z / DEPTH);
+    }
+    // shoulder bolts
+    const [X, Y] = P(1030 + side * 700, 130);
+    const bolt = new Group();
+    bolt.position.copy(onChest(X, Y, 0.07));
+    bolt.lookAt(bolt.position.clone().add(new Vector3(bolt.position.x * 0.8, 0.6, bolt.position.z / DEPTH)));
+    bolt.add(new Mesh(new CylinderGeometry(0.028, 0.03, 0.014, 24).rotateX(Math.PI / 2), steel));
+    bolt.add(new Mesh(new CylinderGeometry(0.017, 0.017, 0.02, 6).rotateX(Math.PI / 2), gloss));
+    chest.add(bolt);
+  }
+
+  /* ───── Gorget: a ring of slats around the neck, two blue lights at the front ───── */
+  const neck = mk(new CylinderGeometry(0.3, 0.34, 0.42, 32), under, 0, 1.2, 0.1);
+  neck.scale.z = 0.75;
+  const SLATS = 40;
+  for (let i = 0; i < SLATS; i++) {
+    const a = (i / SLATS) * Math.PI * 2;
+    const slat = mk(rbox(0.05, 0.3, 0.05, 0.014), i % 3 ? gloss : armor, Math.sin(a) * 0.36, 1.08, 0.14 + Math.cos(a) * 0.27);
+    slat.rotation.order = 'YXZ';
+    slat.rotation.y = a;
+    slat.rotation.x = -0.28; // flared at the bottom
+  }
+  for (const side of [-1, 1]) {
+    mk(rbox(0.02, 0.045, 0.012, 0.006), led, side * 0.048, 1.02, 0.45).rotation.x = -0.28;
+    const s = new Sprite(new SpriteMaterial({ map: glow, color: 0x6fc2ff, blending: AdditiveBlending, transparent: true, opacity: 0.7, depthWrite: false }));
+    s.position.set(side * 0.048, 1.02, 0.475);
+    s.scale.setScalar(0.1);
+    chest.add(s);
+  }
+
+  // breathing: the chest swells a touch
+  const breathe = (t: number) => {
+    const k = Math.sin(t * 1.4) * 0.006;
+    chest.scale.set(1 + k, 1 + k * 0.5, 1 + k * 1.6);
+  };
+
+  return { root, breathe };
 }
 
 export function createSuit(canvas: HTMLCanvasElement, initial: Pose) {
@@ -231,44 +374,35 @@ export function createSuit(canvas: HTMLCanvasElement, initial: Pose) {
   renderer.toneMappingExposure = 1.15;
 
   const scene = new Scene();
-  // a soft studio environment gives the metal plates something to reflect
+  // a soft studio environment gives the wet plates something to reflect
   const pmrem = new PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.05).texture;
-  (scene as any).environmentIntensity = 0.26;
+  (scene as any).environmentIntensity = 0.5;
 
   const camera = new PerspectiveCamera(32, 1, 0.1, 50);
-  camera.position.set(0, 0.1, 8.6);
+  camera.position.set(0, 0, 8.6);
   camera.lookAt(0, 0, 0);
 
-  const fig = buildFigure();
+  const chest = buildChest();
   const stage = new Group();
-  stage.add(fig.root);
+  stage.add(chest.root);
   scene.add(stage);
-  fig.root.position.y = -0.05;
 
-  // Warm key from the beam side, cold rims from behind, a yellow pool at the feet.
-  scene.add(new AmbientLight(0x8d97ad, 0.7));
-  scene.add(new HemisphereLight(0xb6c4e6, 0x2a1f0e, 0.7));
-  const key = new DirectionalLight(0xffd49a, 3);
-  key.position.set(-3.2, 4, 3.4);
+  // Cold, monochrome light as in the frames: a key from above, a hot spec on the right, blue rims.
+  scene.add(new AmbientLight(0x7d8fb0, 0.3));
+  scene.add(new HemisphereLight(0xb3c6e0, 0x05070a, 0.35));
+  const key = new DirectionalLight(0xdfe9ff, 2.8);
+  key.position.set(-1, 4, 2.6);
   scene.add(key);
-  const rim = new DirectionalLight(0x8fb0ff, 6.5);
+  const spec = new DirectionalLight(0xe6f0ff, 2.2);
+  spec.position.set(3.2, 1.2, 3);
+  scene.add(spec);
+  const fill = new DirectionalLight(0x6f95e0, 1.2);
+  fill.position.set(-3, -1, 3);
+  scene.add(fill);
+  const rim = new DirectionalLight(0x8fb0ff, 4);
   rim.position.set(3.4, 2.2, -3.2);
   scene.add(rim);
-  const rim2 = new DirectionalLight(0xdfe8ff, 3.5);
-  rim2.position.set(-2.8, 1.4, -3.4);
-  scene.add(rim2);
-  const pool = new PointLight(0xffd400, 7, 5.5, 2);
-  pool.position.set(0, -1.7, 1.1);
-  stage.add(pool);
-
-  const ring = new Mesh(
-    new RingGeometry(0.55, 1.2, 56),
-    new MeshBasicMaterial({ color: 0xffd400, transparent: true, opacity: 0.2, blending: AdditiveBlending, depthWrite: false })
-  );
-  ring.rotation.x = -Math.PI / 2;
-  ring.position.set(0, -1.86, 0);
-  stage.add(ring);
 
   /* Sizing */
   let aspect = 1;
@@ -283,23 +417,24 @@ export function createSuit(canvas: HTMLCanvasElement, initial: Pose) {
   resize();
   window.addEventListener('resize', resize);
 
-  /* Pose state, eased every frame */
-  const cur = { x: 0, rotY: 0, scale: 1 };
-  let tgt: Target = { ...POSES[initial] };
+  const halfH = () => Math.tan((camera.fov * Math.PI) / 360) * camera.position.z;
+  // right third of the screen on wide viewports, centred on narrow ones
+  const wide = () => aspect > 1.25;
+  const worldX = () => (wide() ? halfH() * aspect * 0.52 : 0);
+
+  /* Shot state, eased every frame */
+  let shot = Math.max(0, POSES[initial].shot);
+  let opacity = POSES[initial].opacity;
   let pose: Pose = initial;
-  const worldX = (k: number) => {
-    // right third of the screen on wide viewports, centred on narrow ones
-    const halfW = Math.tan((camera.fov * Math.PI) / 360) * camera.position.z * aspect;
-    return aspect > 1.25 ? k * halfW * 0.56 : 0;
-  };
-  cur.x = worldX(tgt.x);
-  cur.rotY = tgt.rotY - 0.8;
-  cur.scale = tgt.scale * 0.92;
+  const cur = { x: worldX(), ...lerpShot(shot) };
+  cur.ry -= 0.5;
+  cur.s *= 0.92;
 
   const setPose = (p: Pose) => {
     if (p === pose) return;
     pose = p;
-    tgt = { ...POSES[p] };
+    if (POSES[p].shot >= 0) shot = POSES[p].shot;
+    opacity = POSES[p].opacity;
   };
 
   /* Pointer */
@@ -311,41 +446,55 @@ export function createSuit(canvas: HTMLCanvasElement, initial: Pose) {
     });
   }
 
+  // fade the edges of the chest into the page with a mask that follows it
+  const centre = new Vector3();
+  let mask = '';
+  const updateMask = () => {
+    centre.set(cur.x, cur.y, 0).project(camera);
+    const hh = halfH();
+    const v = [
+      (centre.x * 0.5 + 0.5) * 100,
+      (-centre.y * 0.5 + 0.5) * 100,
+      ((0.92 * stage.scale.x) / (hh * aspect)) * 50,
+      ((0.62 * stage.scale.x) / hh) * 50,
+    ].map((n) => n.toFixed(1));
+    const next = v.join();
+    if (next === mask) return;
+    mask = next;
+    canvas.style.setProperty('--cx', `${v[0]}%`);
+    canvas.style.setProperty('--cy', `${v[1]}%`);
+    canvas.style.setProperty('--rx', `${v[2]}%`);
+    canvas.style.setProperty('--ry', `${v[3]}%`);
+  };
+
   let canvasOpacity = 0;
-  let whip = 0;
+  const keys = ['y', 's', 'rx', 'ry', 'light'] as const;
   gsap.ticker.add((time) => {
-    cur.x += (worldX(tgt.x) - cur.x) * 0.06;
-    cur.rotY += (tgt.rotY - cur.rotY) * 0.045;
-    cur.scale += (tgt.scale - cur.scale) * 0.06;
-    canvasOpacity += (tgt.opacity - canvasOpacity) * 0.06;
+    const tgt = lerpShot(shot);
+    for (const k of keys) cur[k] += (tgt[k] - cur[k]) * 0.045;
+    cur.x += (worldX() - cur.x) * 0.06;
+    canvasOpacity += (opacity - canvasOpacity) * 0.06;
     canvas.style.opacity = canvasOpacity.toFixed(3);
     if (canvasOpacity < 0.005) return; // nothing to see: skip the work
 
     m.x += (m.tx - m.x) * 0.05;
     m.y += (m.ty - m.y) * 0.05;
-    // the cape whips when the page is scrolled fast
-    const vel = Math.min(Math.abs(lenis?.velocity ?? 0), 40) / 40;
-    whip += (vel - whip) * 0.07;
 
-    stage.position.x = cur.x;
-    stage.scale.setScalar(cur.scale * 0.8);
-    stage.rotation.y = cur.rotY + m.x * 0.18 + Math.sin(time * 0.4) * 0.03;
-    fig.body.rotation.z = Math.sin(time * 0.5) * 0.012; // weight shift
-    fig.torso.rotation.y = Math.sin(time * 0.37) * 0.05;
-    fig.torso.position.y = Math.sin(time * 1.6) * 0.009; // breathing
-    fig.head.rotation.y = m.x * 0.38;
-    fig.head.rotation.x = m.y * 0.16 + 0.03;
-    fig.head.rotation.z = Math.sin(time * 0.3) * 0.02;
-    for (const a of fig.arms) {
-      a.upper.rotation.z = a.baseZ + Math.sin(time * 1.1 + a.side) * 0.014 + whip * a.side * 0.12;
-      a.fore.rotation.x = a.baseX + Math.sin(time * 1.3 + a.side) * 0.022;
-    }
-    fig.updateCape(time, m.x * 0.35, whip);
-    ring.rotation.z = time * 0.12;
+    stage.position.set(cur.x, cur.y, 0);
+    stage.scale.setScalar(cur.s * (wide() ? 0.88 : 0.78));
+    stage.rotation.set(cur.rx + m.y * 0.05, cur.ry + m.x * 0.14 + Math.sin(time * 0.4) * 0.02, Math.sin(time * 0.3) * 0.006);
+    chest.breathe(time);
+    key.intensity = 4.2 * cur.light;
+    spec.intensity = 3.2 * cur.light;
+    updateMask();
     renderer.render(scene, camera);
   });
 
   window.addEventListener('pw:pose', (e) => setPose((e as CustomEvent<Pose>).detail));
+  // the manifesto scrubs from the second frame to the third
+  window.addEventListener('pw:shot', (e) => {
+    if (pose === 'manifesto') shot = Math.min(SHOTS.length - 1, Math.max(0, (e as CustomEvent<number>).detail));
+  });
 
   return { setPose };
 }
