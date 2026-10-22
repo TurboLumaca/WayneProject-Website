@@ -1,12 +1,14 @@
 /* ───────────────────────── Tokens ───────────────────────── */
 :root {
-  --f-serif: 'Instrument Serif', 'Times New Roman', serif;
-  --f-display: 'Big Shoulders Display', 'Oswald', Impact, sans-serif;
-  --f-sans: 'Inter Tight', system-ui, sans-serif;
-  --f-mono: 'JetBrains Mono', ui-monospace, monospace;
+  --f-serif: 'Bodoni Moda', 'Didot', 'Times New Roman', serif; /* the boardroom: letterhead, annual report */
+  --f-display: 'Big Shoulders Display', 'Oswald', Impact, sans-serif; /* Chicago civic signage */
+  --f-label: 'Big Shoulders Text', 'Big Shoulders Display', Impact, sans-serif; /* wayfinding */
+  --f-body: 'Source Serif 4', Georgia, serif;
+  --f-mono: 'Courier Prime', 'Courier New', monospace; /* his own words, the original site's typeface */
+  --track: 0.12em;
 
-  --signal: #ffd400;
-  --brass: #9a7440;
+  --manila: #c9b48c; /* Evidence Room folders only */
+  --stamp: #c23a2b; /* rubber stamp ink */
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-door: cubic-bezier(0.77, 0, 0.18, 1);
 
@@ -82,7 +84,7 @@ body {
   margin: 0;
   background: var(--bg);
   color: var(--fg);
-  font-family: var(--f-sans);
+  font-family: var(--f-body);
   font-size: 17px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
@@ -142,12 +144,20 @@ html.lenis body {
 }
 
 /* ───────────────────────── Type ───────────────────────── */
+/* A line of his own typewriter, not a template label. Data captions (dt) stay stamped caps. */
 .eyebrow {
   font-family: var(--f-mono);
-  font-size: 11px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
+  font-size: 14px;
+  letter-spacing: 0;
+  text-transform: none;
   color: var(--muted);
+}
+dt.eyebrow,
+.eyebrow.cap {
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: var(--track);
+  text-transform: uppercase;
 }
 
 .serif {
@@ -198,8 +208,12 @@ html.lenis body {
 
 .floor {
   position: relative;
-  padding-block: clamp(96px, 14vh, 180px);
+  padding-block: calc(var(--ceiling, 1) * clamp(96px, 14vh, 180px));
 }
+/* Ceiling heights: the boardroom is tall, the Evidence Room is low and cramped */
+.floor[data-fl='record'] { --ceiling: 1.25; }
+.floor[data-fl='archive'] { --ceiling: 1.1; }
+.floor[data-fl='cases'] { --ceiling: 0.6; }
 
 .floor-head {
   display: grid;
@@ -211,7 +225,7 @@ html.lenis body {
 .floor-head .code {
   font-family: var(--f-mono);
   font-size: 12px;
-  letter-spacing: 0.16em;
+  letter-spacing: var(--track);
   color: var(--accent);
   border: 1px solid currentColor;
   padding: 6px 8px 5px;
@@ -220,6 +234,20 @@ html.lenis body {
 }
 .floor-head .eyebrow {
   grid-column: 2;
+}
+
+.next {
+  margin-top: clamp(48px, 8vh, 96px);
+}
+
+/* The cave palette, for sections that stay dark while the page theme changes */
+.in-cave {
+  --bg: #0a0a0b;
+  --fg: #e6e4df;
+  --muted: #8f8d88;
+  --line: rgba(230, 228, 223, 0.12);
+  --accent: #ffd400;
+  --accent-ink: #0a0a0b;
 }
 
 .rule {
@@ -237,9 +265,9 @@ html.lenis body {
   height: 52px;
   padding: 0 22px;
   border: 1px solid var(--line);
-  font-family: var(--f-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: var(--track);
   text-transform: uppercase;
   position: relative;
   overflow: hidden;
@@ -285,9 +313,9 @@ html.lenis body {
   display: inline-flex;
   align-items: center;
   gap: 14px;
-  font-family: var(--f-mono);
-  font-size: 12px;
-  letter-spacing: 0.14em;
+  font-family: var(--f-label);
+  font-size: 13px;
+  letter-spacing: var(--track);
   text-transform: uppercase;
   padding-bottom: 6px;
   border-bottom: 1px solid var(--line);
@@ -328,9 +356,23 @@ html[data-theme='bruce'] .grain {
 }
 
 /* ───────────────────────── Reveal helpers ───────────────────────── */
-.js [data-reveal] {
-  opacity: 0;
-  transform: translateY(24px);
+/* Digit reel (see initReveals): one cell per digit, a strip of 0–9 behind it */
+.rl-cell {
+  display: inline-block;
+  height: 1em;
+  overflow: hidden;
+  vertical-align: top;
+  line-height: 1;
+}
+.rl-strip {
+  display: flex;
+  flex-direction: column;
+}
+.rl-strip i {
+  display: block;
+  height: 1em;
+  font-style: normal;
+  line-height: 1;
 }
 .line-mask {
   display: block;
@@ -356,10 +398,6 @@ html[data-theme='bruce'] .grain {
 @media (prefers-reduced-motion: reduce) {
   .grain {
     animation: none;
-  }
-  .js [data-reveal] {
-    opacity: 1;
-    transform: none;
   }
   *,
   *::before,

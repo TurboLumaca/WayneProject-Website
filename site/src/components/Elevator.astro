@@ -102,7 +102,8 @@ import { floors } from '../data/wayne';
   .elev-btn[aria-current='true'] {
     border-color: var(--accent);
     color: var(--accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent), 0 0 18px color-mix(in srgb, var(--accent) 35%, transparent);
+    background: var(--accent);
+    color: var(--accent-ink);
   }
 
   .eb-name {
@@ -111,7 +112,7 @@ import { floors } from '../data/wayne';
     top: 50%;
     transform: translate(8px, -50%);
     white-space: nowrap;
-    font-family: var(--f-sans);
+    font-family: var(--f-body);
     font-size: 13px;
     letter-spacing: 0;
     padding: 7px 10px;
@@ -133,15 +134,15 @@ import { floors } from '../data/wayne';
   }
   .eb-text i {
     font-style: normal;
-    font-family: var(--f-mono);
-    font-size: 9.5px;
+    font-family: var(--f-label);
+    font-size: 13px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     opacity: 0.6;
   }
   .eb-key {
     font-family: var(--f-mono);
-    font-size: 10px;
+    font-size: 11px;
     border: 1px solid currentColor;
     padding: 0 4px;
     opacity: 0.6;

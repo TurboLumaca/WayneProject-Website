@@ -4,7 +4,7 @@ import PageHero from '../components/PageHero.astro';
 import { influences, channels } from '../data/wayne';
 ---
 
-<Base title="The Archive — Project Wayne" floor="archive" theme="bruce">
+<Base title="The Archive · Project Wayne" floor="archive" theme="bruce">
   <PageHero
     floor="archive"
     eyebrow="Media pulled from while working on the project"
@@ -43,8 +43,8 @@ import { influences, channels } from '../data/wayne';
     <div class="wrap">
       <header class="floor-head">
         <span class="code">✉</span>
-        <h2 class="serif h-lg" data-split>Join the project</h2>
-        <p class="eyebrow">Where the conversation actually happens</p>
+        <h2 class="serif h-lg" data-split>Where he posts</h2>
+        <p class="eyebrow">YouTube, Reddit, Goodreads, TikTok, GitHub</p>
       </header>
       <ul class="chan">
         {
@@ -104,7 +104,7 @@ import { influences, channels } from '../data/wayne';
   .study-note {
     margin: 24px 0 0;
     font-size: 11px;
-    letter-spacing: 0.12em;
+    letter-spacing: var(--track);
     text-transform: uppercase;
     color: var(--muted);
   }
@@ -139,8 +139,8 @@ import { influences, channels } from '../data/wayne';
   }
   .sc-kind {
     justify-self: start;
-    font-size: 10px;
-    letter-spacing: 0.16em;
+    font-size: 11px;
+    letter-spacing: var(--track);
     text-transform: uppercase;
     color: var(--accent);
     border: 1px solid currentColor;
@@ -195,9 +195,6 @@ import { influences, channels } from '../data/wayne';
     font-size: 12px;
     letter-spacing: 0.1em;
     color: var(--muted);
-  }
-  .next {
-    margin-top: clamp(48px, 8vh, 96px);
   }
 
   @media (max-width: 960px) {

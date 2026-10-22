@@ -1,9 +1,9 @@
-import { gsap, SplitText, ScrollTrigger, initReveals, arrived, reduce } from './core';
+import { gsap, SplitText, ScrollTrigger, initReveals, isBruceFloor, arrived, reduce } from './core';
 import { rain } from './viz';
 
 /** Shared boot for inner pages: hero entrance + scroll reveals. */
 const hero = document.querySelector<HTMLElement>('[data-phero]');
-if (hero && !reduce) {
+if (hero && !reduce && !isBruceFloor(hero)) {
   const title = hero.querySelector<HTMLElement>('[data-ptitle]');
   const rest = hero.querySelectorAll<HTMLElement>('[data-pin]');
   if (rest.length) gsap.set(rest, { opacity: 0, y: 22 });

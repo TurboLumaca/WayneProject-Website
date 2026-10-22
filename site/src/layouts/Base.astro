@@ -14,7 +14,7 @@ interface Props {
   theme: 'night' | 'bruce' | 'cave';
   signal?: boolean;
 }
-const { title, description = 'A real man’s attempt to become Bruce Wayne — told as a descent from the tower to the cave.', floor, theme, signal = true } = Astro.props;
+const { title, description = 'Day one was November 15, 2022. A public record of one man trying to become Bruce Wayne.', floor, theme, signal = true } = Astro.props;
 ---
 
 <!doctype html>
@@ -29,7 +29,7 @@ const { title, description = 'A real man’s attempt to become Bruce Wayne — t
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter+Tight:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Big+Shoulders+Text:wght@500;600;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..700;1,6..96,400..700&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Source+Serif+4:ital,opsz,wght@0,8..60,400..600;1,8..60,400&display=swap"
       rel="stylesheet"
     />
     <script is:inline>
@@ -41,7 +41,6 @@ const { title, description = 'A real man’s attempt to become Bruce Wayne — t
         }
       } catch (e) {}
     </script>
-    <noscript><style>.js [data-reveal]{opacity:1!important;transform:none!important}</style></noscript>
   </head>
   <body data-floor={floor}>
     <a class="sr-only" href="#main">Skip to content</a>

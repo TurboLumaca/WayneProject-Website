@@ -2,7 +2,7 @@
 import Base from '../../layouts/Base.astro';
 import PageHero from '../../components/PageHero.astro';
 import { projects } from '../../data/wayne';
-import { projectPages } from '../../data/projects';
+import { projectPages, preAssessments, timelines } from '../../data/projects';
 
 export function getStaticPaths() {
   return projectPages.map((p, i) => ({
@@ -12,16 +12,70 @@ export function getStaticPaths() {
 }
 const { page, prev, next } = Astro.props;
 const meta = projects.find((p) => p.code === page.code)!;
+const photo = ['world-record-in-pull-ups', 'a-book-a-day'].includes(page.slug);
+const sessions = page.slug === 'mma' ? [...(page.notes ?? [])].reverse() : [];
+const line = timelines[page.slug];
 ---
 
-<Base title={`${page.name} — Project Wayne`} floor="cave" theme="cave" description={meta.text}>
+<Base title={`${page.name} · Project Wayne`} floor="cave" theme="cave" description={meta.text}>
   <PageHero floor="cave" face="display" eyebrow={page.kicker} title={page.name} lede={meta.text} rain>
     <p class="back mono" data-pin><a href="/cave#projects">← Workshop · all projects</a></p>
   </PageHero>
 
-  <figure class="banner" data-reveal>
-    <img src={page.img} alt={page.imgAlt} loading="eager" />
-  </figure>
+  {
+    photo && (
+      <figure class="banner">
+        <img src={page.img} alt={page.imgAlt} loading="eager" />
+      </figure>
+    )
+  }
+  {
+    page.slug === 'certified-public-accountant' && (
+      <div class="draw" role="img" aria-label="Pre-assessment results, 11/21/2023: four passed, three failed">
+        <div class="wrap">
+          <p class="eyebrow">11/21/2023 · pre-assessments</p>
+          <ol class="pre">
+            {preAssessments.map((a) => (
+              <li class:list={{ fail: !a.passed }}>
+                <span class="pre-name">{a.name}</span>
+                <span class="pre-res mono">{a.passed ? 'passed' : 'failed'}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    )
+  }
+  {
+    page.slug === 'mma' && (
+      <div class="draw" role="img" aria-label={`${sessions.length} post-session notes, August 18 to September 19, 2025`}>
+        <div class="wrap">
+          <p class="eyebrow">{sessions.length} post-session notes, one tick each</p>
+          <ol class="ticks">
+            {sessions.map((n) => (
+              <li><i></i><span class="mono">{n.replace(/\.?,? 2025/, '').replace('Sept.', 'Sept')}</span></li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    )
+  }
+  {
+    line && (
+      <div class="draw">
+        <div class="wrap">
+          <ol class="tl">
+            {line.map((e) => (
+              <li class:list={{ miss: e.miss }}>
+                <span class="mono tl-date">{e.date}</span>
+                <span class="tl-text">{e.text}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </div>
+    )
+  }
 
   <section class="floor pj">
     <div class="wrap pj-grid">
@@ -92,7 +146,7 @@ const meta = projects.find((p) => p.code === page.code)!;
   .back {
     margin: 32px 0 0;
     font-size: 12px;
-    letter-spacing: 0.14em;
+    letter-spacing: var(--track);
     text-transform: uppercase;
   }
   .back a {
@@ -124,6 +178,109 @@ const meta = projects.find((p) => p.code === page.code)!;
     object-fit: cover;
     object-position: 50% 30%;
     filter: saturate(0.85) contrast(1.05);
+  }
+  .draw {
+    border-bottom: 1px solid var(--line);
+    padding-block: clamp(32px, 6vh, 64px);
+  }
+  .pre {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .pre li {
+    background: var(--bg);
+    padding: 16px 14px 18px;
+    display: grid;
+    gap: 14px;
+    align-content: space-between;
+    min-height: 150px;
+  }
+  .pre-name {
+    font-family: var(--f-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(18px, 1.6vw, 24px);
+    line-height: 1;
+  }
+  .pre-res {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .pre .fail .pre-name {
+    text-decoration: line-through;
+    text-decoration-color: var(--stamp);
+    text-decoration-thickness: 3px;
+  }
+  .pre .fail .pre-res {
+    color: var(--stamp);
+    font-weight: 700;
+  }
+  .ticks {
+    list-style: none;
+    margin: 24px 0 0;
+    padding: 0;
+    display: flex;
+    gap: clamp(4px, 1vw, 14px);
+    align-items: flex-end;
+  }
+  .ticks li {
+    flex: 1;
+    display: grid;
+    gap: 8px;
+    justify-items: center;
+  }
+  .ticks i {
+    display: block;
+    width: 2px;
+    height: clamp(48px, 9vw, 110px);
+    background: var(--accent);
+  }
+  .ticks span {
+    font-size: 11px;
+    color: var(--muted);
+    writing-mode: vertical-rl;
+    rotate: 180deg;
+    white-space: nowrap;
+  }
+  .tl {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 24px;
+    border-top: 1px solid var(--fg);
+  }
+  .tl li {
+    padding-top: 14px;
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  .tl-date {
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .tl-text {
+    font-family: var(--f-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(22px, 2.2vw, 32px);
+    line-height: 1;
+  }
+  .tl .miss .tl-text {
+    color: var(--stamp);
+  }
+  @media (max-width: 860px) {
+    .pre {
+      grid-template-columns: 1fr 1fr;
+    }
   }
   .pj-grid {
     display: grid;
@@ -170,8 +327,8 @@ const meta = projects.find((p) => p.code === page.code)!;
     border-bottom: 1px solid var(--line);
   }
   .sheet dt {
-    font-size: 10px;
-    letter-spacing: 0.18em;
+    font-size: 11px;
+    letter-spacing: var(--track);
     text-transform: uppercase;
     color: var(--muted);
   }
@@ -203,7 +360,7 @@ const meta = projects.find((p) => p.code === page.code)!;
     display: inline-block;
     margin-top: 16px;
     font-size: 11px;
-    letter-spacing: 0.14em;
+    letter-spacing: var(--track);
     text-transform: uppercase;
     color: var(--accent);
   }
@@ -243,7 +400,7 @@ const meta = projects.find((p) => p.code === page.code)!;
     flex-wrap: wrap;
     gap: 6px 16px;
     font-size: 11px;
-    letter-spacing: 0.16em;
+    letter-spacing: var(--track);
     text-transform: uppercase;
   }
   .e-date {
@@ -292,7 +449,7 @@ const meta = projects.find((p) => p.code === page.code)!;
   }
   .pn-card .mono {
     font-size: 11px;
-    letter-spacing: 0.18em;
+    letter-spacing: var(--track);
     text-transform: uppercase;
     color: var(--muted);
   }

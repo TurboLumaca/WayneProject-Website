@@ -3,18 +3,18 @@ import Emblem from './Emblem.astro';
 import { channels } from '../data/wayne';
 ---
 
-<footer class="signal" id="signal">
+<footer class="signal in-cave" id="signal">
   <div class="signal-beam" aria-hidden="true"></div>
   <div class="wrap signal-inner">
     <p class="eyebrow">Newsletter</p>
     <h2 class="serif h-lg signal-title">Light the signal.</h2>
-    <p class="lede">Get every new case file, Monk Mode and video script by email, the day it goes up.</p>
+    <p class="lede">Last file: Year 3, Week 41. The next one comes by email.</p>
 
     <form class="signal-form" data-signal-form>
       <label class="sr-only" for="signal-email">Email address</label>
       <input id="signal-email" type="email" required placeholder="you@example.com" autocomplete="email" />
       <button class="btn btn--solid" type="submit">
-        Light it <span class="arrow">→</span>
+        Send it to me <span class="arrow">→</span>
       </button>
     </form>
     <p class="signal-note mono" data-signal-note aria-live="polite"></p>
@@ -40,18 +40,17 @@ import { channels } from '../data/wayne';
         }
       </ul>
     </div>
+    <figure class="origin">
+      <blockquote class="mono">“I find the website typography and the background images behind the text somewhat intruding and annoying.”<cite>José Pérez, June 15, 2024</cite></blockquote>
+      <blockquote class="mono reply">“Thanks for the feedback! I’ll definitely fix that.”<cite>Project Wayne, same day</cite></blockquote>
+      <figcaption class="mono">This is why the site was rebuilt.</figcaption>
+    </figure>
     <p class="sf-legal mono">Design prototype · All content from projectwayne.com · Not affiliated with DC</p>
   </div>
 </footer>
 
 <style>
   .signal {
-    --bg: #0a0a0b;
-    --fg: #e6e4df;
-    --muted: #8f8d88;
-    --line: rgba(230, 228, 223, 0.12);
-    --accent: #ffd400;
-    --accent-ink: #0a0a0b;
     position: relative;
     background: var(--bg);
     color: var(--fg);
@@ -143,8 +142,8 @@ import { channels } from '../data/wayne';
   }
   .sf-brand strong {
     display: block;
-    font-family: var(--f-mono);
-    font-size: 12px;
+    font-family: var(--f-label);
+    font-size: 13px;
     letter-spacing: 0.2em;
     text-transform: uppercase;
     font-weight: 500;
@@ -178,9 +177,37 @@ import { channels } from '../data/wayne';
     font-size: 11px;
     color: var(--muted);
   }
+  .origin {
+    margin: clamp(48px, 8vh, 96px) 0 0;
+    padding: 18px 22px;
+    max-width: 640px;
+    border: 1px solid var(--accent);
+    display: grid;
+    gap: 14px;
+    font-size: 14px;
+  }
+  .origin blockquote {
+    margin: 0;
+    line-height: 1.55;
+  }
+  .origin cite {
+    display: block;
+    font-style: normal;
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+  .origin .reply {
+    padding-left: 24px;
+    color: var(--accent);
+  }
+  .origin figcaption {
+    font-size: 12px;
+    color: var(--muted);
+  }
   .sf-legal {
     margin-top: 40px;
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: #5c5a56;

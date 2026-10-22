@@ -51,7 +51,7 @@ export const floors: Floor[] = [
     blurb: 'Four years of accomplishments.',
     ref: 'Batman Begins · The Dark Knight',
     mood: 'Wayne Enterprises, the public face. Minutes of the board.',
-    rooms: [1, 2, 3, 4].map((n) => ({ id: `year-${n}`, label: `Year ${n}`, blurb: ['Nov 2022 — Oct 2023', 'Nov 2023 — Oct 2024', 'Nov 2024 — Oct 2025', 'Nov 2025 — present'][n - 1], anchor: `#year-${n}` })),
+    rooms: [1, 2, 3, 4].map((n) => ({ id: `year-${n}`, label: `Year ${n}`, blurb: ['Nov 2022 – Oct 2023', 'Nov 2023 – Oct 2024', 'Nov 2024 – Oct 2025', 'Nov 2025 – present'][n - 1], anchor: `#year-${n}` })),
   },
   {
     id: 'blueprint', code: 'L12', level: 12, name: 'Applied Sciences', fn: 'The Blueprint', href: '/blueprint', theme: 'bruce', wing: 'bruce',
@@ -102,9 +102,9 @@ export const floorCode = (level: number) =>
   level > 0 ? `L${String(level).padStart(2, '0')}` : level === 0 ? 'G' : `B${Math.abs(level)}`;
 
 export const manifesto = [
-  'Batman has no powers.',
-  'The languages, the physique, the companies he runs — all of it is work.',
-  'Project Wayne is the attempt to get as close to him as a real person can.',
+  'Batman has no special powers.',
+  'The languages, the physique, the companies he runs, etc.',
+  'Products of his relentless work ethic.',
 ];
 
 export const manifestoLong =
@@ -121,7 +121,7 @@ export interface Year {
 export const years: Year[] = [
   {
     n: 1,
-    span: 'Nov 2022 — Oct 2023',
+    span: 'Nov 2022 – Oct 2023',
     title: 'Taking up the reins',
     items: [
       { text: 'Earned motorcycle license' },
@@ -130,11 +130,11 @@ export const years: Year[] = [
   },
   {
     n: 2,
-    span: 'Nov 2023 — Oct 2024',
+    span: 'Nov 2023 – Oct 2024',
     title: 'Building the machine',
     items: [
       { text: 'Started the Project Wayne YouTube channel' },
-      { text: 'Earned B.S. Business Administration — Accounting', key: true },
+      { text: 'Earned B.S. Business Administration, Accounting', key: true },
       { text: 'Graduated with a B.S. in Fire Science', key: true },
       { text: 'Became a licensed security guard' },
       { text: 'Took the real estate pre-licensing course' },
@@ -144,7 +144,7 @@ export const years: Year[] = [
   },
   {
     n: 3,
-    span: 'Nov 2024 — Oct 2025',
+    span: 'Nov 2024 – Oct 2025',
     title: 'The output years',
     items: [
       { text: 'YouTube channel hits 1,000 subscribers (Jan 2)' },
@@ -160,7 +160,7 @@ export const years: Year[] = [
   },
   {
     n: 4,
-    span: 'Nov 2025 — present',
+    span: 'Nov 2025 – present',
     title: 'Habitus',
     items: [
       { text: 'Project goes remote during deployment to the Middle East; returns with a Combat Infantry Badge', key: true },
@@ -171,6 +171,14 @@ export const years: Year[] = [
       { text: 'Extreme intentionality, combined with Jocko Willink’s extreme ownership' },
     ],
   },
+];
+
+/** What went wrong, from his own journal pages. Dates and wording as written there. */
+export const misses: { year: number; date: string; plan: string; said: string }[] = [
+  { year: 2, date: '11/21/2023', plan: 'Pass the WGU pre-assessments', said: 'Failed three of seven. Fundamentals for Success in Business took four attempts.' },
+  { year: 2, date: 'Jul 1, 2024', plan: 'SAT division of Project Feynman', said: 'Cancelled.' },
+  { year: 2, date: 'Sep 20, 2024', plan: 'State real estate exam', said: 'Annoyed at myself for messing up like this. The best time to have taken it was now.' },
+  { year: 4, date: 'Feb 2026', plan: 'Running log', said: '4 miles in the whole month. The log notes a bout of COVID.' },
 ];
 
 export const headline = [
@@ -209,18 +217,18 @@ export const blueprintNote = {
 };
 
 export const financeGuides = [
-  { name: 'FIRE', full: 'Financial Independence, Retire Early', text: 'The basis for every other strategy: invest aggressively, young, until the growth pays for life.', href: `${ORIGIN}/finance/financial-independence-retire-early-fire/` },
-  { name: 'Accounts', full: 'Setting Up Financial Accounts', text: 'The basic accounts to open as soon as possible.', href: `${ORIGIN}/setting-up-financial-accounts/` },
-  { name: 'Credit', full: 'Credit Card Strategies', text: 'Cash back, and a strategy that funds travel for free.', href: `${ORIGIN}/finance/credit-card-strategies/` },
-  { name: 'Profit First', full: 'Profit First Banking Strategy', text: 'Digital envelope budgeting that keeps FIRE on schedule.', href: `${ORIGIN}/finance/profit-first-banking-strategy/` },
-  { name: 'Education', full: 'Financing Bruce Wayne’s Education', text: 'Paying for medical, business and law school.', href: `${ORIGIN}/finance/financing-bruce-waynes-extensive-education/` },
-  { name: 'Diet', full: 'Bulking / Dieting on a Budget', text: 'Fuel a hybrid physique without breaking the plan.', href: `${ORIGIN}/finance/bulking-dieting-on-a-budget/` },
+  { name: 'FIRE', full: 'Financial Independence, Retire Early', text: 'Invest hard while young; every other strategy here feeds this one.', href: `${ORIGIN}/finance/financial-independence-retire-early-fire/` },
+  { name: 'Accounts', full: 'Setting Up Financial Accounts', text: 'The accounts to open first.', href: `${ORIGIN}/setting-up-financial-accounts/` },
+  { name: 'Credit', full: 'Credit Card Strategies', text: 'Cash back, and a card strategy that pays for travel.', href: `${ORIGIN}/finance/credit-card-strategies/` },
+  { name: 'Profit First', full: 'Profit First Banking Strategy', text: 'Envelope budgeting, done with digital accounts.', href: `${ORIGIN}/finance/profit-first-banking-strategy/` },
+  { name: 'Education', full: 'Financing Bruce Wayne’s Education', text: 'Medical, business and law school: who pays.', href: `${ORIGIN}/finance/financing-bruce-waynes-extensive-education/` },
+  { name: 'Diet', full: 'Bulking / Dieting on a Budget', text: 'Eating for size or for a cut on a fixed budget.', href: `${ORIGIN}/finance/bulking-dieting-on-a-budget/` },
 ];
 
 export const research = [
-  { name: 'Sleep schedules and techniques', text: 'Polyphasic sleep, evaluated.', href: `${ORIGIN}/research/polyphasic-sleep-schedules/` },
-  { name: 'Wayne’s Education Blueprint', text: 'Which degrees, and in what order.', href: `${ORIGIN}/research/waynes-education-blueprint/` },
-  { name: 'Mentors', text: 'Who to learn from, and where.', href: `${ORIGIN}/mentors/` },
+  { name: 'Sleep schedules and techniques', text: 'Polyphasic sleep.', href: `${ORIGIN}/research/polyphasic-sleep-schedules/` },
+  { name: 'Wayne’s Education Blueprint', text: 'Which degrees, in what order.', href: `${ORIGIN}/research/waynes-education-blueprint/` },
+  { name: 'Mentors', text: 'Who to learn from.', href: `${ORIGIN}/mentors/` },
 ];
 
 export const influences = [
@@ -228,8 +236,8 @@ export const influences = [
   { name: 'Tim Kennedy', why: 'Training MMA on active duty as a Green Beret', kind: 'Soldier' },
   { name: 'Absolute Batman', why: 'Becoming Batman with little to no resources', kind: 'Comic' },
   { name: 'Black Edge', why: 'Information processing and an automated inbox', kind: 'Book' },
-  { name: 'Bobby Axelrod', why: 'Billions — huge work capacity', kind: 'Series' },
-  { name: 'Ari Gold', why: 'Entourage — work ethic and training', kind: 'Series' },
+  { name: 'Bobby Axelrod', why: 'Billions: huge work capacity', kind: 'Series' },
+  { name: 'Ari Gold', why: 'Entourage: work ethic and training', kind: 'Series' },
   { name: 'The Almanack of Naval Ravikant', why: 'Leverage over labor', kind: 'Book' },
 ];
 
@@ -261,10 +269,10 @@ export const cases: CaseFile[] = [
   { no: 5, title: 'Tuesday, October 24th, 2023', date: 'Oct 24, 2023', year: 1, kind: 'journal', href: `${N}/year-1/tuesday-october-24th-2023/` },
   { no: 6, title: 'Thursday, November 9th, 2023', date: 'Nov 9, 2023', year: 1, kind: 'journal', href: `${N}/year-1/thursday-november-9th-2023/` },
   { no: 7, title: 'November', date: 'Nov 2023', year: 2, kind: 'journal', href: `${N}/year-2/november/` },
-  { no: 8, title: 'Monk Mode 2', date: 'Mar 3 — May 13, 2024', year: 2, kind: 'monk', closed: true, excerpt: 'The second Monk Mode of Year Two: March 3rd to May 13th.', href: `${N}/year-2/monk-mode-2-march-3rd-may-13th/` },
+  { no: 8, title: 'Monk Mode 2', date: 'Mar 3 – May 13, 2024', year: 2, kind: 'monk', closed: true, excerpt: 'The second Monk Mode of Year Two: March 3rd to May 13th.', href: `${N}/year-2/monk-mode-2-march-3rd-may-13th/` },
   { no: 9, title: 'June', date: 'Jun 2024', year: 2, kind: 'journal', excerpt: 'Ten entries. On June 13th he was training at 100 pull-ups a day.', href: `${N}/year-2/june/` },
   { no: 10, title: 'July', date: 'Jul 2024', year: 2, kind: 'journal', href: `${N}/year-2/july/` },
-  { no: 11, title: 'Monk Mode 3', date: 'Jul 25 — Sep 20, 2024', year: 2, kind: 'monk', closed: true, excerpt: 'I was previously working 80 hours a week… This only left me with around four hours each day to sleep, workout, run, and build my other business ventures.', href: `${N}/year-2/monk-mode-3-july-25th-sept-20th/` },
+  { no: 11, title: 'Monk Mode 3', date: 'Jul 25 – Sep 20, 2024', year: 2, kind: 'monk', closed: true, excerpt: 'I was previously working 80 hours a week… This only left me with around four hours each day to sleep, workout, run, and build my other business ventures.', href: `${N}/year-2/monk-mode-3-july-25th-sept-20th/` },
   { no: 12, title: 'Sunday, January 5th', date: 'Jan 5, 2025', year: 3, kind: 'journal', href: `${N}/year-2-copyyear-3/sunday-january-5th/` },
   { no: 13, title: 'Sunday, March 30th', date: 'Mar 30, 2025', year: 3, kind: 'journal', excerpt: 'When you’re younger, people focus on seeing your potential but as you get older, they only care about your results.', href: `${N}/year-2-copyyear-3/sunday-march-30th/` },
   ...[16, 17, 18, 19, 20, 21, 23, 24, 28, 30, 31, 34, 35, 38, 40, 41].map((w, i) => ({
@@ -287,7 +295,7 @@ export const pullups = {
   quote: 'Despite doing them every back workout, after four years of working out I couldn’t do more than 10.',
 };
 
-// Monthly miles from the public running sheet (Jul 2024 — Aug 2026).
+// Monthly miles from the public running sheet (Jul 2024 – Aug 2026).
 export const running = {
   totalMiles: 1819.5,
   runs: 531,
@@ -314,7 +322,7 @@ export interface Project {
 }
 
 export const projects: Project[] = [
-  { code: 'FIN-30', name: 'Financial Independence by 30', text: 'Save $1,250,000 by age 30 — free to do whatever job he wants.', status: 'Active', progress: 0.2, progressLabel: '1/5 of goal', href: `${ORIGIN}/projects/` },
+  { code: 'FIN-30', name: 'Financial Independence by 30', text: 'Save $1,250,000 by age 30, free to take whatever job he wants.', status: 'Active', progress: 0.2, progressLabel: '1/5 of goal', href: `${ORIGIN}/projects/` },
   { code: 'PULL-24', name: 'World Record in Pull-Ups', text: 'Most pull-ups in 24 hours. Target: 10,000.', status: 'Training', progress: 0.01, progressLabel: '100 / day', href: `${ORIGIN}/project-feynman/world-record-in-pull-ups/` },
   { code: 'RE-LIC', name: 'Real Estate Investing', text: 'Represent himself in deals to grow the portfolio.', status: 'Licensed', progress: 1, progressLabel: 'License earned', href: `${ORIGIN}/real-estate/` },
   { code: 'CPA', name: 'Certified Public Accountant', text: 'Understand the financials of a company before starting one.', status: 'Studying', href: `${ORIGIN}/certified-public-accountant/` },
@@ -326,4 +334,6 @@ export const projects: Project[] = [
 
 export const tools = ['Google Calendar', 'Notion', 'Clockify', 'MyFitnessPal', 'Garmin Connect', 'Trello', 'Gmail'];
 
-export const caveWall = ['No powers.', 'No inheritance.', 'Only the work.'];
+// His own line, Case 013 (Mar 30, 2025).
+export const caveWall = ['…as you get older,', 'they only care', 'about your results.'];
+export const caveWallSource = 'Case 013 · Mar 30, 2025';

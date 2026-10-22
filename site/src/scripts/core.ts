@@ -593,22 +593,18 @@ function initSignal() {
 }
 
 /* ───────────── Reveal helpers (for pages) ───────────── */
+/** Boardroom, lab and manor stay still: no line reveals on the Bruce wing. */
+export const isBruceFloor = (el: Element) => {
+  const fl = el.closest<HTMLElement>('[data-fl]')?.dataset.fl || document.body.dataset.floor || '';
+  return ['record', 'blueprint', 'archive'].includes(fl);
+};
+
 export function initReveals(scope: ParentNode = document) {
-  scope.querySelectorAll<HTMLElement>('[data-reveal]').forEach((el) => {
-    const delay = Number(el.dataset.delay || 0);
-    gsap.to(el, {
-      opacity: 1,
-      y: 0,
-      duration: 1,
-      delay,
-      ease: 'expo.out',
-      scrollTrigger: { trigger: el, start: 'top 90%', once: true },
-    });
-  });
+  // Reading text does not animate in. Only machines move (doors, reel, torch, stamp, grid).
 
   document.fonts.ready.then(() => {
     scope.querySelectorAll<HTMLElement>('[data-split]').forEach((el) => {
-      if (reduce) return;
+      if (reduce || isBruceFloor(el)) return;
       SplitText.create(el, {
         type: 'lines',
         mask: 'lines',
@@ -630,17 +626,36 @@ export function initReveals(scope: ParentNode = document) {
   scope.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => {
     const to = Number(el.dataset.count);
     const dec = Number(el.dataset.dec || 0);
-    const obj = { v: 0 };
-    const fmt = (v: number) => v.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
-    if (reduce) return void (el.textContent = fmt(to));
-    el.textContent = fmt(0);
-    gsap.to(obj, {
-      v: to,
-      duration: 2.4,
-      ease: 'expo.out',
-      delay: Number(el.dataset.delay || 0),
-      onUpdate: () => (el.textContent = fmt(obj.v)),
-      scrollTrigger: { trigger: el, start: 'top 98%', once: true },
+    const final = to.toLocaleString('en-US', { minimumFractionDigits: dec, maximumFractionDigits: dec });
+    if (reduce) return void (el.textContent = final);
+    // Digits roll on a reel and stop one by one, left to right, like a floor indicator.
+    el.setAttribute('aria-label', final);
+    el.textContent = '';
+    const strips: { strip: HTMLElement; d: number }[] = [];
+    for (const ch of final) {
+      const cell = document.createElement('span');
+      cell.setAttribute('aria-hidden', 'true');
+      if (/\d/.test(ch)) {
+        cell.className = 'rl-cell';
+        const strip = document.createElement('span');
+        strip.className = 'rl-strip';
+        strip.innerHTML = Array.from({ length: 10 }, (_, d) => `<i>${d}</i>`).join('');
+        cell.appendChild(strip);
+        strips.push({ strip, d: Number(ch) });
+      } else cell.textContent = ch;
+      el.appendChild(cell);
+    }
+    gsap.set(strips.map((s) => s.strip), { yPercent: 0 });
+    strips.forEach(({ strip, d }, i) => {
+      gsap.to(strip, {
+        yPercent: -d * 10,
+        duration: 0.7 + i * 0.16,
+        ease: `steps(${Math.max(d, 1)})`,
+        delay: Number(el.dataset.delay || 0),
+        scrollTrigger: { trigger: el, start: 'top 98%', once: true },
+        // settle back to plain text so digit spacing is natural once the reel stops
+        onComplete: i === strips.length - 1 ? () => { el.textContent = final; el.removeAttribute('aria-label'); } : undefined,
+      });
     });
   });
 }

@@ -184,6 +184,36 @@ export const projectPages: ProjectPage[] = [
   },
 ];
 
+/** The seven WGU pre-assessments of 11/21/2023, as logged. */
+export const preAssessments: { name: string; passed: boolean }[] = [
+  { name: 'Organization Behavior', passed: true },
+  { name: 'Critical Thinking and Logic', passed: true },
+  { name: 'Fundamentals for Success in Business', passed: false },
+  { name: 'Introduction to Sociology', passed: false },
+  { name: 'Compensation and Benefits', passed: false },
+  { name: 'Human Resource Management', passed: true },
+  { name: 'Principles of Management', passed: true },
+];
+
+/** Dated beats for projects that have no photo of their own. `miss` marks a stumble. */
+export const timelines: Record<string, { date: string; text: string; miss?: boolean }[]> = {
+  'real-estate': [
+    { date: 'Apr 2024', text: 'Course finished' },
+    { date: 'Jun 24, 2024', text: 'Pre-licensing exam passed' },
+    { date: 'Sep 2024', text: 'State exam date missed', miss: true },
+    { date: 'early 2025', text: 'License exam passed' },
+  ],
+  'b-s-computer-science': [
+    { date: 'Apr 3, 2024', text: 'Plan: pre-game on Sophia.com, about $100 a month' },
+    { date: 'Apr 29, 2024', text: 'Four Sophia classes done' },
+    { date: 'Sep 4, 2024', text: 'Two readers say: try TESU instead' },
+  ],
+  'project-feynman': [
+    { date: 'Jun 2024', text: 'World Record in Pull-Ups opens as a subdivision' },
+    { date: 'Jul 1, 2024', text: 'SAT division cancelled', miss: true },
+  ],
+};
+
 export const projectBySlug = (s: string) => projectPages.find((p) => p.slug === s)!;
 export const slugForCode = (code: string) => projectPages.find((p) => p.code === code)?.slug;
 

@@ -5,7 +5,7 @@ import { floors, years, cases, projects, financeGuides, influences, research, ph
 // One flat index for the ⌘K "Wayne/OS" palette. Every entry points at a page
 // and an anchor so the elevator can ride there.
 const index = [
-  ...floors.map((f) => ({ t: `${f.name} — ${f.fn}`, s: `${f.code} · ${f.wing === 'batman' ? 'Batman' : 'Bruce Wayne'} wing · ${f.mood}`, k: 'Space', h: f.href, f: f.id })),
+  ...floors.map((f) => ({ t: `${f.name} · ${f.fn}`, s: `${f.code} · ${f.wing === 'batman' ? 'Batman' : 'Bruce Wayne'} wing · ${f.mood}`, k: 'Space', h: f.href, f: f.id })),
   ...floors.flatMap((f) =>
     f.rooms.filter((r) => r.anchor).map((r) => ({ t: r.label, s: `${f.name} · ${r.blurb}`, k: 'Room', h: `${f.href}${r.anchor}`, f: f.id }))
   ),
@@ -106,7 +106,7 @@ const index = [
     border-bottom: 1px solid var(--p-line);
   }
   .ph-os {
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.2em;
     color: #ffd400;
   }
@@ -128,7 +128,7 @@ const index = [
   }
   kbd {
     font: inherit;
-    font-size: 10px;
+    font-size: 11px;
     border: 1px solid var(--p-line);
     padding: 2px 5px;
     color: #8f8d88;
@@ -160,13 +160,13 @@ const index = [
     border-left-color: #ffd400;
   }
   .palette-list :global(.pi-kind) {
-    font-size: 10px;
-    letter-spacing: 0.14em;
+    font-size: 11px;
+    letter-spacing: var(--track);
     text-transform: uppercase;
     color: #8f8d88;
   }
   .palette-list :global(.pi-t) {
-    font-family: var(--f-sans);
+    font-family: var(--f-body);
     font-size: 15px;
     display: block;
     overflow: hidden;
@@ -205,7 +205,7 @@ const index = [
     gap: 18px;
     padding: 10px 16px;
     border-top: 1px solid var(--p-line);
-    font-size: 10px;
+    font-size: 11px;
     color: #8f8d88;
     flex-wrap: wrap;
   }

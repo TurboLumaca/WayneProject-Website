@@ -6,7 +6,7 @@ import { forumPosts } from '../data/projects';
 const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 ---
 
-<Base title="The Forum — Project Wayne" floor="archive" theme="bruce" description="Latest forum posts and feedback on Project Wayne.">
+<Base title="The Forum · Project Wayne" floor="archive" theme="bruce" description="Latest forum posts and feedback on Project Wayne.">
   <PageHero
     floor="archive"
     eyebrow="Latest forum posts"
@@ -98,7 +98,7 @@ const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join
     display: grid;
     place-items: center;
     font-size: 12px;
-    letter-spacing: 0.08em;
+    letter-spacing: var(--track);
     border: 1px solid var(--line);
     background: color-mix(in srgb, var(--fg) 4%, transparent);
     color: var(--muted);
@@ -127,7 +127,7 @@ const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join
     align-items: center;
     gap: 6px 14px;
     font-size: 11px;
-    letter-spacing: 0.14em;
+    letter-spacing: var(--track);
     text-transform: uppercase;
   }
   .meta strong {
@@ -140,7 +140,7 @@ const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join
     padding: 2px 8px;
     border: 1px solid var(--accent);
     color: var(--accent);
-    font-size: 10px;
+    font-size: 11px;
   }
   .bubble p {
     margin: 12px 0 0;
@@ -185,7 +185,7 @@ const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join
     .avatar {
       width: 34px;
       height: 34px;
-      font-size: 10px;
+      font-size: 11px;
     }
     .bubble {
       padding: 14px 16px 16px;

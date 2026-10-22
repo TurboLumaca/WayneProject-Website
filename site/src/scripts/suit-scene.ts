@@ -6,7 +6,6 @@ import {
   CanvasTexture,
   CylinderGeometry,
   DirectionalLight,
-  ExtrudeGeometry,
   Float32BufferAttribute,
   Group,
   HemisphereLight,
@@ -32,12 +31,10 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { gsap, isTouch } from './core';
 
 /**
- * The chest of an armored suit in the spirit of the Arkham Knight, built from
- * code and traced over reference frames: the black sternum, ribbed panels and
- * glossy side plates form one big bat across the chest, framed by domed navy
- * plates (pectorals, shoulders, lower ribs). A slatted gorget with two blue
- * lights sits on top. The camera moves through five shots, one per reference
- * frame, in order as the page scrolls. Fan-made from primitives.
+ * The chest of an armored suit, built from code: a black sternum and ribbed
+ * panels framed by domed navy plates (pectorals, shoulders, lower ribs). A
+ * slatted gorget with two blue lights sits on top. No emblem on the chest.
+ * The camera moves through five shots in order as the page scrolls.
  */
 
 export type Pose = 'hero' | 'manifesto' | 'cases' | 'cave' | 'dim' | 'hidden';
@@ -245,19 +242,6 @@ function chestPlate(pts: Vector2[], { t = 0.04, dome = 0.012, edge = 0.09, lift 
   return g;
 }
 
-// a crisp bevelled relief for shapes a dome can't follow (the bat head's ears)
-function chestRelief(cmds: Cmd[], { depth = 0.025, bevel = 0.01, lift = 0 } = {}) {
-  const g = new ExtrudeGeometry(shapeOf(cmds), { depth, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel * 0.6, bevelSegments: 2, curveSegments: 8 });
-  const p = g.attributes.position;
-  const v = new Vector3();
-  for (let i = 0; i < p.count; i++) {
-    onChest(p.getX(i), p.getY(i), lift + p.getZ(i), v);
-    p.setXYZ(i, v.x, v.y, v.z);
-  }
-  g.computeVertexNormals();
-  return g;
-}
-
 // right-hand plates, traced over 3.webp
 const PLATES = {
   pec: [[1150, 560], [1130, 470, 1170, 420], [1210, 345, 1300, 320], [1490, 300], [1560, 300, 1560, 380], [1555, 470], [1550, 560, 1470, 580], [1250, 610], [1160, 620, 1150, 560]],
@@ -279,7 +263,6 @@ function buildChest() {
   const gloss = new MeshPhysicalMaterial({ color: 0x090d14, roughness: 0.5, roughnessMap: wet, metalness: 0.5, clearcoat: 1, clearcoatRoughness: 0.05 });
   const under = new MeshStandardMaterial({ color: 0x111720, roughness: 0.7, metalness: 0.3, bumpMap: rib, bumpScale: 1.6 });
   const steel = new MeshPhysicalMaterial({ color: 0x5b6d88, roughness: 0.28, metalness: 0.75, clearcoat: 1, clearcoatRoughness: 0.1 });
-  const tab = new MeshBasicMaterial({ color: 0xe8f3ff });
   const led = new MeshBasicMaterial({ color: 0x9fdcff });
   const glow = glowTexture();
 
@@ -305,13 +288,12 @@ function buildChest() {
   const core = mk(new LatheGeometry(PROF.map(([r, y]) => new Vector2(r, y)), 64), under);
   core.scale.z = DEPTH;
 
-  /* ───── The bat: head and ears, sternum, ribbed panels, glossy wings ───── */
-  mk(chestRelief([[965, 415], [952, 500], [960, 580], [1000, 622], [1060, 622], [1100, 580], [1108, 500], [1095, 418], [1072, 468], [1030, 498], [988, 468]], { depth: 0.03, bevel: 0.012, lift: 0.02 }), gloss);
+  /* ───── Sternum and ribbed panels ───── */
   plate([[992, 610], [1068, 610], [1066, 1110], [994, 1110]], gloss, { t: 0.045, dome: 0.018, edge: 0.3 }, false);
   plate(PLATES.collarbone, gloss, { t: 0.03, dome: 0.006, edge: 0.12, lift: -0.004 });
   plate(PLATES.frame, gloss, { t: 0.03, dome: 0.006, edge: 0.12, lift: -0.004 });
   plate(PLATES.ribbed, under, { t: 0.022, dome: 0.004, edge: 0.06, lift: -0.004 });
-  plate(PLATES.wing, gloss, { t: 0.05, dome: 0.02, edge: 0.08 });
+  plate(PLATES.wing, armor, { t: 0.05, dome: 0.02, edge: 0.08 });
 
   /* ───── Navy plates around it ───── */
   plate([[935, 340], [1125, 340], [1100, 410], [1075, 465], [1030, 492], [985, 465], [960, 410]], armor, { t: 0.04, dome: 0.008, edge: 0.12 }, false);
@@ -322,13 +304,6 @@ function buildChest() {
   plate(PLATES.trap, gloss, { t: 0.04, dome: 0.008, edge: 0.1, lift: -0.008 });
 
   for (const side of [-1, 1]) {
-    // white tabs where the wings meet the ribbed panels
-    for (const [x, y] of [[1540, 578], [1508, 792]]) {
-      const [X, Y] = P(1030 + side * (x - 1030), y);
-      const p = onChest(X, Y, 0.012);
-      const t = mk(rbox(0.012, 0.035, 0.012, 0.004), tab, p.x, p.y, p.z);
-      t.rotation.y = Math.atan2(p.x, p.z / DEPTH);
-    }
     // shoulder bolts
     const [X, Y] = P(1030 + side * 700, 130);
     const bolt = new Group();

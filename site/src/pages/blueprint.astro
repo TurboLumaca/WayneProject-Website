@@ -4,7 +4,7 @@ import PageHero from '../components/PageHero.astro';
 import { phases, blueprintNote, financeGuides, research } from '../data/wayne';
 ---
 
-<Base title="The Blueprint — Project Wayne" floor="blueprint" theme="bruce">
+<Base title="The Blueprint · Project Wayne" floor="blueprint" theme="bruce">
   <PageHero
     floor="blueprint"
     eyebrow="A step-by-step guide to becoming a real-life Bruce Wayne"
@@ -106,7 +106,7 @@ import { phases, blueprintNote, financeGuides, research } from '../data/wayne';
     right: calc(var(--gutter) + var(--rail));
     bottom: 18px;
     font-family: var(--f-mono);
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 0.2em;
     color: var(--muted);
   }
@@ -127,7 +127,7 @@ import { phases, blueprintNote, financeGuides, research } from '../data/wayne';
   .storey-n {
     font-size: clamp(110px, 20vw, 340px);
     line-height: 0.78;
-    color: var(--accent);
+    color: var(--fg);
   }
   .storey-main {
     display: grid;
@@ -152,7 +152,7 @@ import { phases, blueprintNote, financeGuides, research } from '../data/wayne';
   }
   .note .mono {
     font-size: 11px;
-    letter-spacing: 0.14em;
+    letter-spacing: var(--track);
     text-transform: uppercase;
     color: var(--accent);
   }
@@ -233,9 +233,6 @@ import { phases, blueprintNote, financeGuides, research } from '../data/wayne';
   }
   .rl-t {
     color: var(--muted);
-  }
-  .next {
-    margin-top: clamp(48px, 8vh, 96px);
   }
 
   @media (max-width: 860px) {

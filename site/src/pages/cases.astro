@@ -7,7 +7,7 @@ const kindLabel = { journal: 'Journal', monk: 'Monk Mode', script: 'Video script
 const monks = cases.filter((c) => c.kind === 'monk').length;
 ---
 
-<Base title="Case Files — Project Wayne" floor="cases" theme="cave">
+<Base title="Case Files · Project Wayne" floor="cases" theme="cave">
   <PageHero
     floor="cases"
     eyebrow="Gotham project · journal entries tracking progress"
@@ -130,8 +130,8 @@ const monks = cases.filter((c) => c.kind === 'monk').length;
     height: 34px;
     padding: 0 14px;
     border: 1px solid var(--line);
-    font-family: var(--f-mono);
-    font-size: 11px;
+    font-family: var(--f-label);
+    font-size: 13px;
     letter-spacing: 0.1em;
     text-transform: uppercase;
     color: var(--muted);
@@ -149,7 +149,7 @@ const monks = cases.filter((c) => c.kind === 'monk').length;
   .count {
     margin: 0 0 0 auto;
     font-size: 11px;
-    letter-spacing: 0.12em;
+    letter-spacing: var(--track);
     text-transform: uppercase;
     color: var(--muted);
   }
@@ -194,7 +194,7 @@ const monks = cases.filter((c) => c.kind === 'monk').length;
   }
   .c-no {
     font-size: clamp(24px, 3vw, 44px);
-    color: var(--accent);
+    color: var(--fg);
     line-height: 1;
     font-variant-numeric: tabular-nums;
   }
@@ -209,8 +209,8 @@ const monks = cases.filter((c) => c.kind === 'monk').length;
     flex-wrap: wrap;
   }
   .c-kind {
-    font-size: 10px;
-    letter-spacing: 0.16em;
+    font-size: 11px;
+    letter-spacing: var(--track);
     text-transform: uppercase;
     padding: 3px 6px 2px;
     border: 1px solid var(--line);
@@ -222,7 +222,7 @@ const monks = cases.filter((c) => c.kind === 'monk').length;
   }
   .c-date {
     font-size: 11px;
-    letter-spacing: 0.08em;
+    letter-spacing: var(--track);
     color: var(--muted);
     text-transform: uppercase;
   }
@@ -250,8 +250,8 @@ const monks = cases.filter((c) => c.kind === 'monk').length;
     text-transform: uppercase;
     font-size: clamp(20px, 2.2vw, 30px);
     letter-spacing: 0.04em;
-    color: #ff4d3a;
-    border: 3px solid #ff4d3a;
+    color: var(--stamp);
+    border: 3px solid var(--stamp);
     padding: 2px 10px 0;
     transform: rotate(-8deg);
     white-space: nowrap;
