@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+---
+
+<Base title="No such floor · Project Wayne" floor="atrium" theme="night" signal={false} description="This address is not a floor in the building.">
+  <PageHero floor="atrium" eyebrow="The elevator stopped between floors." title="No such floor" face="display" lede="Pick one from the panel on the right, or press M for the map.">
+    <p class="back mono" data-pin><a href="/">← Ride back to the roof</a></p>
+  </PageHero>
+  <script>
+    import '../scripts/page';
+  </script>
+</Base>
+
+<style>
+  .back {
+    margin: 32px 0 0;
+    font-size: 13px;
+  }
+  .back a {
+    color: var(--accent);
+    border-bottom: 1px solid var(--line);
+  }
+</style>
