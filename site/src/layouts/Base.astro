@@ -1,0 +1,64 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Elevator from '../components/Elevator.astro';
+import Doors from '../components/Doors.astro';
+import Palette from '../components/Palette.astro';
+import MapOverlay from '../components/Map.astro';
+import Signal from '../components/Signal.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+  floor: string;
+  theme: 'night' | 'bruce' | 'cave';
+  signal?: boolean;
+}
+const { title, description = 'A real man’s attempt to become Bruce Wayne — told as a descent from the tower to the cave.', floor, theme, signal = true } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme={theme}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#07080a" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;800;900&family=Inter+Tight:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <script is:inline>
+      // Runs before first paint: mark JS, and if we arrived by elevator keep the doors shut.
+      document.documentElement.classList.add('js');
+      try {
+        if (sessionStorage.getItem('pw-ride') && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          document.documentElement.classList.add('doors-closed', 'riding');
+        }
+      } catch (e) {}
+    </script>
+    <noscript><style>.js [data-reveal]{opacity:1!important;transform:none!important}</style></noscript>
+  </head>
+  <body data-floor={floor}>
+    <a class="sr-only" href="#main">Skip to content</a>
+    <Nav />
+    <Elevator />
+    <canvas class="suit-bg" data-suit aria-hidden="true"></canvas>
+    <main id="main">
+      <slot />
+    </main>
+    {signal && <Signal />}
+    <Palette />
+    <MapOverlay />
+    <Doors />
+    <div class="grain" aria-hidden="true"></div>
+    <script>
+      import '../scripts/core';
+      import '../scripts/suit';
+    </script>
+  </body>
+</html>

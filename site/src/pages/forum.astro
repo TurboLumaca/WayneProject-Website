@@ -1,0 +1,171 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { forumPosts } from '../data/projects';
+
+const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
+---
+
+<Base title="The Forum — Project Wayne" floor="archive" theme="bruce" description="Latest forum posts and feedback on Project Wayne.">
+  <PageHero
+    floor="archive"
+    eyebrow="Latest forum posts"
+    title="The Forum"
+    lede="Notes from the build and what readers said back. Eight responses so far, one of them changed the design."
+  />
+
+  <section class="floor fm">
+    <div class="wrap fm-grid">
+      <ol class="thread">
+        {
+          forumPosts.map((p, i) => (
+            <li class:list={['post', p.owner && 'is-owner', p.reply && 'is-reply']} data-reveal data-delay={(i % 3) * 0.05}>
+              <span class="avatar mono" aria-hidden="true">{initials(p.who)}</span>
+              <div class="bubble">
+                <div class="meta mono">
+                  <strong>{p.who}</strong>
+                  {p.owner && <span class="tag">Site owner</span>}
+                  <time>{p.date}</time>
+                </div>
+                <p>{p.text}</p>
+              </div>
+            </li>
+          ))
+        }
+      </ol>
+
+      <aside class="side">
+        <div class="card" data-reveal>
+          <p class="eyebrow">More posts</p>
+          <p class="serif">Newer posts live on the Project Wayne subreddit.</p>
+          <a class="btn btn--solid" href="https://www.reddit.com/r/becomingbatman" target="_blank" rel="noopener">r/becomingbatman <span class="arrow">→</span></a>
+        </div>
+        <div class="card quiet" data-reveal data-delay="0.08">
+          <p class="eyebrow">Reply</p>
+          <p>The comment form is read-only in this prototype. Original thread: <a href="https://projectwayne.com/forum/" target="_blank" rel="noopener">projectwayne.com/forum</a>.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/page';
+  </script>
+</Base>
+
+<style>
+  .fm-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(240px, 0.7fr);
+    gap: clamp(32px, 6vw, 96px);
+    align-items: start;
+  }
+  .thread {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 22px;
+  }
+  .post {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
+    gap: 16px;
+  }
+  .post.is-reply {
+    margin-left: clamp(24px, 6vw, 72px);
+  }
+  .avatar {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--fg) 4%, transparent);
+    color: var(--muted);
+  }
+  .is-owner .avatar {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .bubble {
+    padding: 18px 22px 20px;
+    border: 1px solid var(--line);
+    background: color-mix(in srgb, var(--fg) 3%, transparent);
+  }
+  .is-owner .bubble {
+    border-left: 2px solid var(--accent);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .meta strong {
+    font-weight: 500;
+  }
+  .meta time {
+    color: var(--muted);
+  }
+  .tag {
+    padding: 2px 8px;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-size: 10px;
+  }
+  .bubble p {
+    margin: 12px 0 0;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+  .side {
+    position: sticky;
+    top: calc(var(--nav-h) + 24px);
+    display: grid;
+    gap: 16px;
+  }
+  .card {
+    padding: 22px;
+    border: 1px solid var(--line);
+    display: grid;
+    gap: 14px;
+    justify-items: start;
+  }
+  .card p {
+    margin: 0;
+  }
+  .card.quiet {
+    color: var(--muted);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  .card a:not(.btn) {
+    border-bottom: 1px solid var(--line);
+  }
+  @media (max-width: 860px) {
+    .fm-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .side {
+      position: static;
+    }
+    .post {
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 10px;
+    }
+    .avatar {
+      width: 34px;
+      height: 34px;
+      font-size: 10px;
+    }
+    .bubble {
+      padding: 14px 16px 16px;
+    }
+  }
+</style>

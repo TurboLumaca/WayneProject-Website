@@ -1,0 +1,279 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHero from '../components/PageHero.astro';
+import { cases } from '../data/wayne';
+
+const kindLabel = { journal: 'Journal', monk: 'Monk Mode', script: 'Video script' } as const;
+const monks = cases.filter((c) => c.kind === 'monk').length;
+---
+
+<Base title="Case Files — Project Wayne" floor="cases" theme="cave">
+  <PageHero
+    floor="cases"
+    eyebrow="Gotham project · journal entries tracking progress"
+    title="Case Files"
+    face="display"
+    rain
+    lede={`${cases.length} numbered entries across three years: field notes, ${monks} Monk Modes and the scripts behind the YouTube videos.`}
+  />
+
+  <section class="floor files">
+    <div class="wrap">
+      <div class="bar" data-reveal>
+        <div class="chips" role="group" aria-label="Filter by year">
+          <button class="chip on" data-year="all" aria-pressed="true">All years</button>
+          <button class="chip" data-year="1" aria-pressed="false">Year 1</button>
+          <button class="chip" data-year="2" aria-pressed="false">Year 2</button>
+          <button class="chip" data-year="3" aria-pressed="false">Year 3</button>
+        </div>
+        <div class="chips" role="group" aria-label="Filter by type">
+          <button class="chip on" data-kind="all" aria-pressed="true">Everything</button>
+          <button class="chip" data-kind="journal" aria-pressed="false">Journal</button>
+          <button class="chip" data-kind="monk" aria-pressed="false">Monk Mode</button>
+          <button class="chip" data-kind="script" aria-pressed="false">Video scripts</button>
+        </div>
+        <p class="mono count"><span data-count-shown>{cases.length}</span> / {cases.length} files</p>
+      </div>
+
+      <ol class="list" data-list>
+        {
+          cases.map((c) => (
+            <li class="case" id={`case-${c.no}`} data-case data-year={c.year} data-kind={c.kind}>
+              <a href={c.href} target="_blank" rel="noopener">
+                <span class="c-no mono">{String(c.no).padStart(3, '0')}</span>
+                <span class="c-main">
+                  <span class="c-top">
+                    <span class={`c-kind mono k-${c.kind}`}>{kindLabel[c.kind]}</span>
+                    <span class="c-date mono">Year {c.year} · {c.date}</span>
+                  </span>
+                  <span class="c-title display">{c.title}</span>
+                  {c.excerpt && <span class="c-ex">{c.excerpt}</span>}
+                </span>
+                {c.closed ? <span class="c-stamp">Case closed</span> : <span class="c-go mono" aria-hidden="true">↗</span>}
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="empty mono" data-empty hidden>No files match. The archive is incomplete: some early entries were lost when the site was rebuilt; a few survive on r/becomingbatman.</p>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/page';
+    import { gsap, ScrollTrigger, reduce } from '../scripts/core';
+
+    const cards = [...document.querySelectorAll<HTMLElement>('[data-case]')];
+    let year = 'all';
+    let kind = 'all';
+    const shown = document.querySelector('[data-count-shown]')!;
+    const empty = document.querySelector<HTMLElement>('[data-empty]')!;
+
+    function apply() {
+      let n = 0;
+      cards.forEach((c) => {
+        const ok = (year === 'all' || c.dataset.year === year) && (kind === 'all' || c.dataset.kind === kind);
+        c.hidden = !ok;
+        if (ok) n++;
+      });
+      shown.textContent = String(n);
+      empty.hidden = n > 0;
+      const vis = cards.filter((c) => !c.hidden);
+      if (!reduce) gsap.fromTo(vis, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.6, ease: 'expo.out', stagger: 0.025, overwrite: true });
+      ScrollTrigger.refresh();
+    }
+
+    document.querySelectorAll<HTMLElement>('.chips').forEach((group) => {
+      group.addEventListener('click', (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLButtonElement>('.chip');
+        if (!b) return;
+        group.querySelectorAll('.chip').forEach((x) => {
+          x.classList.toggle('on', x === b);
+          x.setAttribute('aria-pressed', String(x === b));
+        });
+        if (b.dataset.year) year = b.dataset.year;
+        if (b.dataset.kind) kind = b.dataset.kind;
+        apply();
+      });
+    });
+
+    // Stamps slam in when a closed case scrolls into view
+    if (!reduce) {
+      document.querySelectorAll<HTMLElement>('.c-stamp').forEach((s) => {
+        gsap.fromTo(s, { scale: 2.4, opacity: 0, rotate: -20 }, { scale: 1, opacity: 1, rotate: -8, duration: 0.45, ease: 'power4.in', scrollTrigger: { trigger: s, start: 'top 88%', once: true } });
+      });
+    }
+
+    // Arrive from ⌘K on a specific case: flash it
+    if (location.hash.startsWith('#case-')) {
+      const t = document.querySelector<HTMLElement>(location.hash);
+      t?.classList.add('flash');
+    }
+  </script>
+</Base>
+
+<style>
+  .bar {
+    display: flex;
+    gap: 14px 32px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--line);
+  }
+  .chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .chip {
+    height: 34px;
+    padding: 0 14px;
+    border: 1px solid var(--line);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    transition: color 0.25s, border-color 0.25s, background 0.25s;
+  }
+  .chip:hover {
+    color: var(--fg);
+    border-color: var(--fg);
+  }
+  .chip.on {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+  }
+  .count {
+    margin: 0 0 0 auto;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .case[hidden] {
+    display: none;
+  }
+  .case a {
+    position: relative;
+    display: grid;
+    grid-template-columns: clamp(56px, 7vw, 110px) 1fr 120px;
+    gap: clamp(14px, 3vw, 40px);
+    align-items: start;
+    padding: clamp(22px, 3.4vh, 36px) 0;
+    border-bottom: 1px solid var(--line);
+    transition: padding 0.5s var(--ease-out);
+  }
+  .case a::before {
+    content: '';
+    position: absolute;
+    inset: 0 -14px;
+    background: var(--bg-2);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: -1;
+  }
+  .case a:hover::before,
+  .case.flash a::before {
+    opacity: 1;
+  }
+  .case a:hover {
+    padding-left: 10px;
+  }
+  .case.flash a {
+    outline: 1px solid var(--accent);
+    outline-offset: 8px;
+  }
+  .c-no {
+    font-size: clamp(24px, 3vw, 44px);
+    color: var(--accent);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .c-main {
+    display: grid;
+    gap: 8px;
+  }
+  .c-top {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .c-kind {
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    padding: 3px 6px 2px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+  .c-kind.k-monk {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .c-date {
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+  .c-title {
+    font-size: clamp(32px, 4.4vw, 68px);
+    line-height: 0.92;
+  }
+  .c-ex {
+    max-width: 62ch;
+    color: var(--muted);
+    font-size: 16px;
+  }
+  .c-go {
+    justify-self: end;
+    transition: transform 0.4s var(--ease-out), color 0.3s;
+  }
+  .case a:hover .c-go {
+    transform: translate(4px, -4px);
+    color: var(--accent);
+  }
+  .c-stamp {
+    justify-self: end;
+    font-family: var(--f-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: clamp(20px, 2.2vw, 30px);
+    letter-spacing: 0.04em;
+    color: #ff4d3a;
+    border: 3px solid #ff4d3a;
+    padding: 2px 10px 0;
+    transform: rotate(-8deg);
+    white-space: nowrap;
+  }
+  .empty {
+    margin-top: 40px;
+    color: var(--muted);
+    font-size: 12px;
+    max-width: 60ch;
+  }
+
+  @media (max-width: 700px) {
+    .case a {
+      grid-template-columns: 52px 1fr;
+    }
+    .c-go,
+    .c-stamp {
+      grid-column: 2;
+      justify-self: start;
+    }
+    .count {
+      margin-left: 0;
+    }
+  }
+</style>

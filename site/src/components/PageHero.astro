@@ -1,0 +1,116 @@
+---
+import { floors } from '../data/wayne';
+
+interface Props {
+  floor: string;
+  code?: string;
+  eyebrow: string;
+  title: string;
+  lede?: string;
+  face?: 'serif' | 'display';
+  rain?: boolean;
+}
+const { floor, eyebrow, title, lede, face = 'serif', rain = false } = Astro.props;
+const f = floors.find((x) => x.id === floor)!;
+---
+
+<section class="phero" data-phero>
+  {rain && <canvas class="phero-rain" data-rain aria-hidden="true" />}
+  <div class="wrap">
+    <div class="plaque" data-pin>
+      <span class="phero-code">{f.code}</span>
+      <span class="pl-space">{f.name}</span>
+      <span class={`pl-wing pl-wing--${f.wing}`}>{f.wing === 'batman' ? 'Batman wing' : 'Bruce Wayne wing'}</span>
+      <span class="pl-ref">Inspired by {f.ref}</span>
+    </div>
+    <p class="eyebrow phero-eb" data-pin>{eyebrow}</p>
+    <h1 class:list={['phero-title', face === 'serif' ? 'serif' : 'display']} data-ptitle>{title}</h1>
+    {lede && <p class="lede phero-lede" data-pin>{lede}</p>}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .phero {
+    position: relative;
+    overflow: hidden;
+    padding-top: calc(var(--nav-h) + clamp(64px, 14vh, 160px));
+    padding-bottom: clamp(56px, 10vh, 120px);
+    border-bottom: 1px solid var(--line);
+  }
+  .phero-rain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .phero > :global(.wrap) {
+    position: relative;
+  }
+  .phero-eb {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 0 clamp(20px, 4vh, 36px);
+  }
+  .plaque {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    margin-bottom: clamp(20px, 3.4vh, 32px);
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .pl-space {
+    color: var(--fg);
+  }
+  .pl-wing {
+    color: var(--muted);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .pl-wing::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    transform: rotate(45deg);
+    background: var(--accent);
+  }
+  .pl-ref {
+    margin-left: auto;
+    color: var(--muted);
+    opacity: 0.75;
+    letter-spacing: 0.1em;
+  }
+  @media (max-width: 760px) {
+    .pl-ref {
+      margin-left: 0;
+      flex-basis: 100%;
+    }
+  }
+  .phero-code {
+    color: var(--accent);
+    border: 1px solid currentColor;
+    padding: 5px 7px 4px;
+    letter-spacing: 0.16em;
+  }
+  .phero-title {
+    margin: 0;
+    font-size: clamp(64px, 13vw, 232px);
+    line-height: 0.88;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  .phero-title.serif {
+    font-weight: 400;
+  }
+  .phero-lede {
+    margin-top: clamp(24px, 4vh, 44px);
+    max-width: 44ch;
+  }
+</style>

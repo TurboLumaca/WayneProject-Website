@@ -1,0 +1,1217 @@
+---
+import Base from '../layouts/Base.astro';
+import Emblem from '../components/Emblem.astro';
+import Skyline from '../components/Skyline.astro';
+import {
+  manifesto,
+  manifestoLong,
+  headline,
+  years,
+  phases,
+  blueprintNote,
+  influences,
+  cases,
+  pullups,
+  running,
+  caveWall,
+  PROJECT_START,
+} from '../data/wayne';
+
+const keyByYear = years.map((y) => ({ ...y, key: y.items.filter((i) => i.key).map((i) => i.text) }));
+const featured = [cases[0], cases.find((c) => c.no === 8)!, cases.find((c) => c.no === 11)!];
+const max = Math.max(...running.months.map((m) => m[1]));
+const marquee = [...influences, ...influences];
+---
+
+<Base title="Project Wayne — The tower and the cave" floor="atrium" theme="night">
+  <!-- ═════════════ L42 · HERO ═════════════ -->
+  <section class="hero" data-fl="atrium" data-pose="hero" data-hero style="--lx: 50%;">
+    <canvas class="hero-gl" data-hero-gl aria-hidden="true"></canvas>
+    <div class="hero-fallback" aria-hidden="true"></div>
+    <Skyline />
+
+    <div class="hero-top mono">
+      <span>Wayne Tower · Roof</span>
+      <span data-clock aria-label="Time since the project began" data-start={PROJECT_START}>DAY 0 · 00:00:00</span>
+    </div>
+
+    <div class="hero-body wrap">
+      <Emblem size={56} class="hero-emblem" />
+      <h1 class="serif hero-title" data-hero-title>
+        <span class="ht-line"><span>How does an</span></span>
+        <span class="ht-line"><span>ordinary man become</span></span>
+        <span class="ht-line"><span><em>Bruce Wayne?</em></span></span>
+      </h1>
+      <p class="hero-sub" data-hero-fade>
+        Project Wayne is a public record of one attempt. Four years, no powers, only the work, told as a descent from the tower to the cave.
+      </p>
+      <div class="hero-cta" data-hero-fade>
+        <a class="btn btn--solid" href="#manifesto" data-scroll>Enter the project <span class="arrow">↓</span></a>
+        <a class="enter-link" href="/cave"><span class="code">B3</span> Straight to the cave</a>
+      </div>
+    </div>
+
+    <dl class="hero-stats wrap" data-hero-fade>
+      {
+        headline.map((h) => (
+          <div>
+            <dt class="eyebrow">{h.label}</dt>
+            <dd>
+              <span class="display hs-n" data-count={h.value} data-delay="1.6">{h.value.toLocaleString('en-US')}</span>
+              <span class="hs-sub mono">{h.sub}</span>
+            </dd>
+          </div>
+        ))
+      }
+    </dl>
+  </section>
+
+  <!-- ═════════════ MANIFESTO ═════════════ -->
+  <section class="manifesto" id="manifesto" data-fl="atrium" data-pose="manifesto" data-manifesto>
+    <div class="mf-sticky wrap">
+      <p class="eyebrow">The manifesto</p>
+      <div class="mf-lines">
+        {manifesto.map((l, i) => <p class="serif mf-line" data-mf-line={i}>{l}</p>)}
+      </div>
+      <p class="mf-long" data-mf-long>{manifestoLong}</p>
+      <div class="mf-progress" aria-hidden="true"><span data-mf-bar></span></div>
+    </div>
+  </section>
+
+  <!-- ═════════════ L30 · THE RECORD ═════════════ -->
+  <section class="floor tease" id="record" data-fl="record" data-pose="hidden">
+    <div class="wrap">
+      <header class="floor-head">
+        <span class="code">L30</span>
+        <h2 class="serif h-xl" data-split>The Record</h2>
+        <p class="eyebrow">Boardroom · four years, in the order they happened</p>
+      </header>
+
+      <ol class="yrows">
+        {
+          keyByYear.map((y) => (
+            <li data-reveal>
+              <a href={`/record#year-${y.n}`} class="yrow">
+                <span class="yr-n display">0{y.n}</span>
+                <span class="yr-meta">
+                  <span class="eyebrow">{y.span}</span>
+                  <span class="serif yr-title">{y.title}</span>
+                </span>
+                <span class="yr-key">{y.key.slice(0, 2).map((k) => <span>{k}</span>)}</span>
+                <span class="yr-go mono" aria-hidden="true">→</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+
+      <div class="tease-foot" data-reveal>
+        <a class="btn" href="/record">Open the full record <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ L12 · THE BLUEPRINT ═════════════ -->
+  <section class="floor tease blue" id="blueprint" data-fl="blueprint" data-pose="hidden">
+    <div class="wrap">
+      <header class="floor-head">
+        <span class="code">L12</span>
+        <h2 class="serif h-xl" data-split>The Blueprint</h2>
+        <p class="eyebrow">Applied Sciences · a step-by-step guide to a real-life Bruce Wayne</p>
+      </header>
+
+      <div class="blue-grid">
+        <div class="fire" data-reveal>
+          <p class="eyebrow">Target by age 30</p>
+          <p class="display fire-n">$<span data-count="1250000">1,250,000</span></p>
+          <p class="fire-sub">Financial independence, retire early. Already a fifth of the way there.</p>
+          <div class="fire-bar" aria-hidden="true"><span data-fire-bar></span></div>
+          <p class="mono fire-bar-l"><span>$0</span><span>1/5 reached</span><span>$1.25M</span></p>
+        </div>
+
+        <div class="phases">
+          {
+            phases.map((p) => (
+              <article class="phase" data-reveal>
+                <span class="phase-n mono">Phase 0{p.n}</span>
+                <h3 class="serif h-md">{p.name}</h3>
+                <p class="phase-tag eyebrow">{p.tag}</p>
+                <p class="phase-text">{p.text}</p>
+              </article>
+            ))
+          }
+          <p class="bp-note" data-reveal>
+            <span class="mono">{blueprintNote.date}</span>
+            {blueprintNote.text}
+          </p>
+        </div>
+      </div>
+
+      <div class="tease-foot" data-reveal>
+        <a class="btn" href="/blueprint">Walk the blueprint <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ G · THE ARCHIVE ═════════════ -->
+  <section class="floor tease arch" id="archive" data-fl="archive" data-pose="hidden">
+    <div class="wrap">
+      <header class="floor-head">
+        <span class="code">G</span>
+        <h2 class="serif h-lg" data-split>Who built the blueprint</h2>
+        <p class="eyebrow">Wayne Manor · influences, in his words</p>
+      </header>
+    </div>
+    <div class="marquee" aria-label="Influences">
+      <div class="marquee-track">
+        {
+          marquee.map((m) => (
+            <span class="mq-item">
+              <span class="serif">{m.name}</span>
+              <span class="mono">{m.why}</span>
+            </span>
+          ))
+        }
+      </div>
+    </div>
+    <div class="wrap">
+      <div class="tease-foot" data-reveal>
+        <a class="btn" href="/archive">Open the archive <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ DESCENT ═════════════ -->
+  <section class="descent" data-fl="cases" data-pose="hidden" data-descent>
+    <div class="descent-stick">
+      <span class="rail rail--l" aria-hidden="true" data-rail></span>
+      <span class="rail rail--r" aria-hidden="true" data-rail></span>
+      <div class="d-door d-door--l" aria-hidden="true" data-d-door></div>
+      <div class="d-door d-door--r" aria-hidden="true" data-d-door></div>
+
+      <div class="d-ui">
+        <p class="eyebrow d-eb">Below the lobby there is a second building</p>
+        <div class="reel" aria-hidden="true">
+          <div class="reel-strip" data-reel>
+            <span>L12</span><span>G</span><span>B1</span>
+          </div>
+        </div>
+        <p class="serif descent-line" data-descent-line>Take the stairs down.</p>
+        <p class="d-arrow mono" data-d-arrow aria-hidden="true">▼ going down</p>
+      </div>
+
+      <div class="d-arrive" aria-hidden="true" data-d-arrive>
+        <span class="mono">B1</span>
+        <span class="display">Case Files</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ B1 · CASE FILES ═════════════ -->
+  <section class="floor tease cases" id="cases" data-fl="cases" data-pose="cases">
+    <div class="wrap">
+      <header class="floor-head">
+        <span class="code">B1</span>
+        <h2 class="display h-xl" data-split>Case Files</h2>
+        <p class="eyebrow">Evidence Room · {cases.length} entries: journal, Monk Modes, video scripts</p>
+      </header>
+
+      <div class="folders" data-folders>
+        {
+          featured.map((c, i) => (
+            <a href={`/cases#case-${c.no}`} class="folder" data-folder style={`--i:${i}`}>
+              <span class="folder-tab mono">CASE {String(c.no).padStart(3, '0')}</span>
+              <span class="folder-date mono">{c.date}</span>
+              <h3 class="display folder-title">{c.title}</h3>
+              <p class="folder-ex">{c.excerpt}</p>
+              {c.closed && <span class="stamp" data-stamp>Case closed</span>}
+            </a>
+          ))
+        }
+      </div>
+
+      <div class="tease-foot" data-reveal>
+        <a class="btn" href="/cases">Open all {cases.length} case files <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ B3 · THE CAVE ═════════════ -->
+  <section class="floor cave-tease" id="cave" data-fl="cave" data-pose="cave">
+    <canvas class="rain" data-rain aria-hidden="true"></canvas>
+    <div class="torch cave-wall" data-torch>
+      <div class="wrap t-dim" aria-hidden="true">
+        <p class="display cw-text">{caveWall.map((l) => <span>{l}</span>)}</p>
+      </div>
+      <div class="wrap t-lit">
+        <p class="display cw-text">{caveWall.map((l) => <span>{l}</span>)}</p>
+      </div>
+      <span class="cw-hint mono" aria-hidden="true">Move to shine a light</span>
+    </div>
+
+    <div class="wrap cave-body">
+      <header class="floor-head">
+        <span class="code">B3</span>
+        <h2 class="display h-xl" data-split>The Cave</h2>
+        <p class="eyebrow">The Cave · live data, straight from the spreadsheets</p>
+      </header>
+
+      <div class="pu" data-pullups>
+        <div class="pu-canvas-wrap">
+          <canvas data-pu-canvas aria-label="A grid of 10,000 dots. Each row of 100 is one daily set of pull-ups."></canvas>
+        </div>
+        <div class="pu-copy">
+          <p class="eyebrow">The record attempt</p>
+          <p class="display pu-n"><span data-pu-count>0</span></p>
+          <p class="pu-sub">
+            The 24-hour world record is closer to 9,000. The target is {pullups.record.toLocaleString('en-US')}.
+            Each row is 100 pull-ups, one of his daily sets. The record is <strong>100 of them back to back</strong>.
+          </p>
+          <p class="mono pu-pace">Pace: {pullups.pace} · {pullups.paceNote}</p>
+        </div>
+      </div>
+
+      <div class="run" data-run>
+        <div class="run-head">
+          <p class="eyebrow">Running log · Jul 2024 — Aug 2026</p>
+          <p class="run-big display"><span data-count={running.totalMiles} data-dec="1">{running.totalMiles}</span> <small>miles</small></p>
+          <p class="mono run-meta">{running.runs} runs · longest {running.longest} mi · 5-mile PR {running.fiveMilePR}</p>
+        </div>
+        <div class="run-bars" aria-hidden="true">
+          {
+            running.months.map(([m, v]) => (
+              <span class="rb" style={`--h:${(v / max).toFixed(3)}`} title={`${m}: ${v} mi`}></span>
+            ))
+          }
+        </div>
+      </div>
+
+      <div class="tease-foot" data-reveal>
+        <a class="btn btn--solid" href="/cave">Enter the cave <span class="arrow">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { gsap, ScrollTrigger, floors, floorById, setHud, setTheme, initReveals, initTorch, scrollToTarget, reduce, arrived } from '../scripts/core';
+    import { startHero } from '../scripts/hero';
+    import { pullGrid, rain } from '../scripts/viz';
+
+    const $ = <T extends HTMLElement>(s: string, r: ParentNode = document) => r.querySelector<T>(s)!;
+    const $$ = <T extends HTMLElement>(s: string, r: ParentNode = document) => [...r.querySelectorAll<T>(s)];
+
+    /* Anchors on this page */
+    $$('[data-scroll]').forEach((a) =>
+      a.addEventListener('click', (e) => {
+        e.preventDefault();
+        scrollToTarget(a.getAttribute('href')!);
+      })
+    );
+
+    /* Day counter since the first journal entry */
+    const clock = $('[data-clock]');
+    const start = new Date(clock.dataset.start!).getTime();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const tick = () => {
+      const s = Math.max(0, Math.floor((Date.now() - start) / 1000));
+      const d = Math.floor(s / 86400);
+      const r = s % 86400;
+      clock.textContent = `DAY ${d.toLocaleString('en-US')} · ${pad(Math.floor(r / 3600))}:${pad(Math.floor((r % 3600) / 60))}:${pad(r % 60)}`;
+    };
+    tick();
+    setInterval(tick, 1000);
+
+    /* Hero: shader + title lit by the beam */
+    const hero = $('[data-hero]');
+    const { intro } = startHero($('[data-hero-gl]') as HTMLCanvasElement, hero);
+    const lines = $$('.ht-line > span', hero);
+    const fades = $$('[data-hero-fade]', hero);
+    if (reduce) gsap.set('.hero-emblem', { opacity: 1 });
+    else {
+      gsap.set(lines, { yPercent: 115 });
+      gsap.set(fades, { opacity: 0, y: 18 });
+      arrived.then(() => {
+        const tl = gsap.timeline({ delay: 0.5 });
+        tl.to('.hero-emblem', { opacity: 1, duration: 1.2 }, 0)
+          .to(lines, { yPercent: 0, duration: 1.5, ease: 'expo.out', stagger: 0.16 }, 0.7)
+          .to(fades, { opacity: 1, y: 0, duration: 1.1, ease: 'power3.out', stagger: 0.12 }, 1.7);
+      });
+    }
+
+    /* Skyline: two layers drift at different speeds while the roof scrolls away */
+    if (!reduce) {
+      gsap.to('[data-sky-far]', { yPercent: 8, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+      gsap.to('[data-sky-near]', { yPercent: -4, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });
+      hero.addEventListener('pointermove', (e) => {
+        const k = e.clientX / innerWidth - 0.5;
+        gsap.to('[data-sky-far]', { x: k * -14, duration: 1.2, ease: 'power3.out', overwrite: 'auto' });
+        gsap.to('[data-sky-near]', { x: k * -34, duration: 1.2, ease: 'power3.out', overwrite: 'auto' });
+      });
+    }
+
+    /* Manifesto: three lines light up in turn */
+    const mf = $('[data-manifesto]');
+    const mfLines = $$('[data-mf-line]', mf);
+    if (!reduce) {
+      gsap.set(mfLines, { opacity: 0.16 });
+      gsap.set('[data-mf-long]', { opacity: 0 });
+      const tl = gsap.timeline({
+        scrollTrigger: { trigger: mf, start: 'top top', end: 'bottom bottom', scrub: 0.6 },
+      });
+      mfLines.forEach((l, i) => {
+        tl.to(l, { opacity: 1, duration: 1 }, i * 1.1);
+        if (i) tl.to(mfLines[i - 1], { opacity: 0.32, duration: 1 }, i * 1.1);
+      });
+      tl.to('[data-mf-long]', { opacity: 1, duration: 1 }, '>-0.2');
+      tl.to('[data-mf-bar]', { scaleX: 1, duration: tl.duration(), ease: 'none' }, 0);
+    }
+
+    /* Floors drive the HUD and the theme as you scroll through the building */
+    $$('[data-fl]').forEach((sec) => {
+      const id = sec.dataset.fl!;
+      const f = floorById(id);
+      if (!f) return;
+      ScrollTrigger.create({
+        trigger: sec,
+        start: 'top 55%',
+        end: 'bottom 55%',
+        onToggle: (self) => {
+          if (!self.isActive) return;
+          setHud(id);
+          setTheme(f.theme);
+          window.dispatchEvent(new CustomEvent('pw:pose', { detail: sec.dataset.pose || 'hidden' }));
+        },
+      });
+    });
+
+    /* Descent: an elevator ride. Doors closed, the floor reel rolls L12 → G → B1, then the doors open */
+    const reel = $('[data-reel]');
+    const dDoors = $$('[data-d-door]');
+    const dl = dDoors[0];
+    const dr = dDoors[1];
+    if (reduce) {
+      gsap.set(reel, { yPercent: -66.6667 });
+      gsap.set([dl, dr], { scaleX: 0 });
+      gsap.set('[data-d-arrive]', { opacity: 1 });
+      gsap.set('[data-d-arrow]', { opacity: 0 });
+    } else {
+      const tl = gsap.timeline({
+        defaults: { ease: 'none' },
+        scrollTrigger: { trigger: '[data-descent]', start: 'top top', end: 'bottom bottom', scrub: 0.5 },
+      });
+      gsap.set([dl, dr], { scaleX: 1 });
+      tl.fromTo('[data-descent-line]', { opacity: 0, y: 24 }, { opacity: 1, y: 0, duration: 0.8 }, 0)
+        // the reel rolls with two stops: L12 → G, then G → B1
+        .to(reel, { yPercent: -33.3333, duration: 1.1, ease: 'power2.inOut' }, 0.9)
+        .to(reel, { yPercent: -66.6667, duration: 1.1, ease: 'power2.inOut' }, 2.4)
+        .to('[data-rail]', { backgroundPositionY: '-1800px', duration: 3.4 }, 0.6)
+        .to('[data-d-arrow]', { opacity: 0, duration: 0.3 }, 3.6)
+        // arrival: the doors open on the next floor
+        .to('[data-descent-line]', { opacity: 0, duration: 0.3 }, 3.7)
+        .to([dl, dr], { scaleX: 0, duration: 1.1, ease: 'power3.inOut' }, 4.0)
+        .to('.reel, .d-eb', { opacity: 0, duration: 0.5 }, 4.1)
+        .to('[data-d-arrive]', { opacity: 1, duration: 0.7 }, 4.4)
+        .to({}, { duration: 0.6 }); // hold on the open doors
+    }
+
+    /* Case folders slide into a stack */
+    if (!reduce) {
+      $$('[data-folder]').forEach((el, i) => {
+        gsap.from(el, {
+          y: 140 + i * 40,
+          rotate: (i - 1) * 3,
+          opacity: 0,
+          duration: 1.2,
+          ease: 'expo.out',
+          scrollTrigger: { trigger: '[data-folders]', start: 'top 80%', once: true },
+          delay: i * 0.12,
+        });
+      });
+      $$('[data-stamp]').forEach((s) => {
+        gsap.fromTo(s, { scale: 2.6, opacity: 0, rotate: -22 }, { scale: 1, opacity: 1, rotate: -9, duration: 0.45, ease: 'power4.in', scrollTrigger: { trigger: s, start: 'top 85%', once: true }, delay: 0.5 });
+      });
+    }
+
+    /* FIRE bar */
+    gsap.fromTo('[data-fire-bar]', { scaleX: 0 }, { scaleX: 0.2, duration: 2, ease: 'expo.out', scrollTrigger: { trigger: '[data-fire-bar]', start: 'top 90%', once: true } });
+
+    /* Cave: torch, pull-up grid, running bars */
+    initTorch($('[data-torch]'));
+    $$<HTMLCanvasElement>('canvas[data-rain]').forEach((c) => rain(c));
+
+    const grid = pullGrid($('[data-pu-canvas]') as HTMLCanvasElement);
+    const puCount = $('[data-pu-count]');
+    const setPu = (p: number) => {
+      grid.set(p);
+      puCount.textContent = grid.count.toLocaleString('en-US');
+    };
+    if (reduce) setPu(0.42);
+    else
+      ScrollTrigger.create({
+        trigger: '[data-pullups]',
+        start: 'top 75%',
+        end: 'bottom 35%',
+        scrub: 0.5,
+        onUpdate: (s) => setPu(s.progress),
+      });
+
+    const rb = $$('.rb');
+    if (!reduce) {
+      gsap.set(rb, { scaleY: 0 });
+      gsap.to(rb, { scaleY: 1, duration: 1.1, ease: 'expo.out', stagger: 0.025, scrollTrigger: { trigger: '[data-run]', start: 'top 80%', once: true } });
+    }
+
+    initReveals();
+    ScrollTrigger.refresh();
+  </script>
+</Base>
+
+<style>
+  /* ───────── Hero ───────── */
+  .hero {
+    position: relative;
+    height: 100svh;
+    min-height: 640px;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    overflow: clip;
+    --bg: #07080a;
+    --fg: #ece8e1;
+    --muted: #8f8b83;
+    --line: rgba(236, 232, 225, 0.14);
+    --accent: #ffd400;
+    --accent-ink: #07080a;
+    color: var(--fg);
+  }
+  .hero-gl {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+  .hero-fallback {
+    position: absolute;
+    inset: 0;
+    display: none;
+    background: radial-gradient(ellipse 40% 90% at 50% 110%, rgba(255, 212, 0, 0.25), transparent 70%);
+  }
+  .hero.no-gl .hero-fallback {
+    display: block;
+  }
+  .hero-top {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: space-between;
+    padding: calc(var(--nav-h) + 18px) calc(var(--gutter) + var(--rail)) 0 var(--gutter);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .hero-top span:last-child {
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .hero-body {
+    position: relative;
+    z-index: 2;
+    align-self: center;
+    width: 100%;
+    padding-block: 1vh;
+  }
+  :global(.hero-emblem) {
+    color: var(--accent);
+    margin-bottom: clamp(12px, 2.4vh, 24px);
+    width: clamp(40px, 5.4vh, 56px);
+    height: auto;
+    opacity: 0;
+    filter: drop-shadow(0 0 18px rgba(255, 212, 0, 0.5));
+  }
+  .hero-title {
+    margin: 0;
+    font-size: clamp(46px, min(8.2vw, 14.5vh), 150px);
+    line-height: 0.93;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+    color: transparent;
+    background: radial-gradient(circle 46vmax at var(--lx, 50%) 105%, #fff 0%, rgba(255, 255, 255, 0.72) 38%, rgba(255, 255, 255, 0.22) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    text-wrap: balance;
+  }
+  .hero-title em {
+    font-style: italic;
+  }
+  .ht-line {
+    display: block;
+    overflow: hidden;
+    padding: 0.04em 0.06em 0.14em 0;
+    margin-bottom: -0.1em;
+  }
+  .ht-line > span {
+    display: block;
+  }
+  .hero-sub {
+    max-width: 46ch;
+    margin: clamp(16px, 3vh, 32px) 0 0;
+    font-size: clamp(16px, 1.3vw, 20px);
+    color: #c9c5bd;
+  }
+  .hero-cta {
+    margin-top: clamp(20px, 3.4vh, 32px);
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .hero-stats {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin: 0 auto;
+    padding-bottom: clamp(18px, 3vh, 30px);
+    padding-top: 10px;
+    width: 100%;
+  }
+  .hero-stats > div {
+    border-top: 1px solid var(--line);
+    padding-top: 14px;
+  }
+  .hero-stats dd {
+    margin: 6px 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 14px;
+  }
+  .hs-n {
+    font-size: clamp(40px, 5vw, 76px);
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .hs-sub {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  /* ───────── Manifesto ───────── */
+  .manifesto {
+    height: 340vh;
+    position: relative;
+  }
+  .mf-sticky {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 28px;
+  }
+  .mf-lines {
+    display: grid;
+    gap: clamp(8px, 2vh, 20px);
+  }
+  .mf-line {
+    margin: 0;
+    font-size: clamp(34px, 6.4vw, 104px);
+    line-height: 1.02;
+    letter-spacing: -0.015em;
+    max-width: 20ch;
+    text-wrap: balance;
+  }
+  .mf-long {
+    margin: 0;
+    max-width: 62ch;
+    font-size: clamp(15px, 1.2vw, 18px);
+    color: var(--muted);
+    border-left: 1px solid var(--accent);
+    padding-left: 18px;
+  }
+  .mf-progress {
+    height: 1px;
+    background: var(--line);
+    max-width: 280px;
+  }
+  .mf-progress span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  /* ───────── Teasers ───────── */
+  .tease-foot {
+    margin-top: clamp(40px, 7vh, 80px);
+  }
+
+  /* Record */
+  .yrows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--line);
+  }
+  .yrow {
+    display: grid;
+    grid-template-columns: clamp(70px, 10vw, 160px) minmax(180px, 1.1fr) 1.6fr 40px;
+    gap: 24px;
+    align-items: center;
+    padding: clamp(22px, 4vh, 40px) 0;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+    transition: padding 0.5s var(--ease-out);
+  }
+  .yrow::before {
+    content: '';
+    position: absolute;
+    inset: 0 -16px;
+    background: var(--bg-2);
+    opacity: 0;
+    transition: opacity 0.4s;
+    z-index: -1;
+  }
+  .yrow:hover::before {
+    opacity: 1;
+  }
+  .yrow:hover {
+    padding-left: 12px;
+  }
+  .yr-n {
+    font-size: clamp(54px, 8vw, 128px);
+    color: var(--accent);
+    line-height: 0.85;
+  }
+  .yr-meta {
+    display: grid;
+    gap: 6px;
+  }
+  .yr-title {
+    font-size: clamp(26px, 2.8vw, 44px);
+    line-height: 1.05;
+  }
+  .yr-key {
+    display: grid;
+    gap: 6px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .yr-key span::before {
+    content: '+ ';
+    color: var(--accent);
+  }
+  .yr-go {
+    justify-self: end;
+    transition: transform 0.4s var(--ease-out);
+  }
+  .yrow:hover .yr-go {
+    transform: translateX(6px);
+    color: var(--accent);
+  }
+
+  /* Blueprint */
+  .blue-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    gap: clamp(32px, 6vw, 112px);
+    align-items: start;
+  }
+  .fire {
+    position: sticky;
+    top: 110px;
+  }
+  .fire-n {
+    font-size: clamp(64px, 11vw, 190px);
+    line-height: 0.85;
+    margin: 14px 0 20px;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
+  }
+  .fire-sub {
+    max-width: 34ch;
+    color: var(--muted);
+    margin: 0 0 28px;
+  }
+  .fire-bar {
+    height: 6px;
+    background: var(--line);
+  }
+  .fire-bar span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  .fire-bar-l {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 10px 0 0;
+  }
+  .phase {
+    border-top: 1px solid var(--line);
+    padding: 26px 0 40px;
+    display: grid;
+    gap: 10px;
+  }
+  .phase-n {
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+  .phase h3 {
+    margin: 0;
+  }
+  .phase-text {
+    margin: 6px 0 0;
+    max-width: 52ch;
+    color: var(--muted);
+  }
+  .bp-note {
+    margin: 0;
+    padding: 18px 20px;
+    background: var(--bg-2);
+    border-left: 2px solid var(--accent);
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .bp-note .mono {
+    display: block;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    margin-bottom: 6px;
+  }
+
+  /* Archive marquee */
+  .arch {
+    overflow: clip;
+  }
+  .marquee {
+    border-block: 1px solid var(--line);
+    overflow: hidden;
+    padding-block: 26px;
+  }
+  .marquee-track {
+    display: flex;
+    gap: 64px;
+    width: max-content;
+    animation: marquee 60s linear infinite;
+  }
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+  .mq-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .mq-item .serif {
+    font-size: clamp(28px, 3.4vw, 52px);
+    line-height: 1;
+  }
+  .mq-item .mono {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+  @keyframes marquee {
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  /* ───────── Descent ───────── */
+  .descent {
+    height: 380vh;
+    position: relative;
+  }
+  .descent-stick {
+    position: sticky;
+    top: 0;
+    height: 100svh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background: #050506;
+  }
+  .d-door {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 50.4%;
+    z-index: 2;
+    background:
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 7px),
+      linear-gradient(90deg, #16171a, #212227 50%, #141518);
+  }
+  .d-door--l {
+    left: 0;
+    transform-origin: left center;
+    box-shadow: inset -1px 0 0 rgba(255, 212, 0, 0.4);
+  }
+  .d-door--r {
+    right: 0;
+    transform-origin: right center;
+    box-shadow: inset 1px 0 0 rgba(255, 212, 0, 0.4);
+  }
+  /* shaft rails drawn on the doors: markers streak upward while we descend */
+  .rail {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    z-index: 3;
+    opacity: 0.75;
+    background: repeating-linear-gradient(to bottom, rgba(255, 212, 0, 0.55) 0 2px, transparent 2px 56px);
+    background-position-y: 0;
+  }
+  .rail--l {
+    left: clamp(12px, 5vw, 80px);
+  }
+  .rail--r {
+    right: clamp(12px, 5vw, 80px);
+  }
+  .d-ui {
+    position: relative;
+    z-index: 4;
+    display: grid;
+    justify-items: center;
+    gap: 16px;
+    text-align: center;
+    padding-inline: var(--gutter);
+  }
+  .reel {
+    height: 0.8em;
+    overflow: hidden;
+    font-family: var(--f-display);
+    font-weight: 800;
+    font-size: clamp(150px, 30vw, 460px);
+    line-height: 0.8;
+    color: var(--accent);
+    text-shadow: 0 0 80px color-mix(in srgb, var(--accent) 35%, transparent);
+    font-variant-numeric: tabular-nums;
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%);
+    mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 88%, transparent 100%);
+  }
+  .reel-strip {
+    display: flex;
+    flex-direction: column;
+    will-change: transform;
+  }
+  .reel-strip span {
+    display: block;
+    height: 0.8em;
+    line-height: 0.8;
+    text-align: center;
+    min-width: 2.2ch;
+  }
+  .descent-line {
+    margin: 0;
+    font-size: clamp(26px, 3vw, 48px);
+  }
+  .d-arrow {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .d-arrive {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 10px;
+    opacity: 0;
+    background: radial-gradient(ellipse 60% 70% at 50% 55%, rgba(255, 212, 0, 0.1), transparent 70%);
+  }
+  .d-arrive .mono {
+    font-size: 12px;
+    letter-spacing: 0.3em;
+    color: var(--accent);
+  }
+  .d-arrive .display {
+    font-size: clamp(60px, 11vw, 190px);
+    line-height: 0.85;
+  }
+
+  /* ───────── Cases ───────── */
+  .folders {
+    overflow: clip;
+    overflow-clip-margin: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    align-items: start;
+  }
+  .folder {
+    position: relative;
+    display: grid;
+    gap: 12px;
+    padding: 26px 24px 30px;
+    background: linear-gradient(180deg, #1b1b1e, #141416);
+    border: 1px solid var(--line);
+    min-height: 340px;
+    transition: transform 0.6s var(--ease-out), border-color 0.3s;
+  }
+  .folder:nth-child(2) {
+    margin-top: 40px;
+  }
+  .folder:nth-child(3) {
+    margin-top: 80px;
+  }
+  .folder:hover {
+    transform: translateY(-10px);
+    border-color: var(--accent);
+  }
+  .folder-tab {
+    justify-self: start;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    padding: 4px 8px;
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+  .folder-date {
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .folder-title {
+    margin: 4px 0 0;
+    font-size: clamp(34px, 3.4vw, 54px);
+    line-height: 0.92;
+  }
+  .folder-ex {
+    margin: 0;
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .stamp {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    font-family: var(--f-display);
+    font-weight: 900;
+    text-transform: uppercase;
+    font-size: 30px;
+    letter-spacing: 0.04em;
+    color: #ff4d3a;
+    border: 3px solid #ff4d3a;
+    padding: 2px 12px 0;
+    transform: rotate(-9deg);
+    mix-blend-mode: screen;
+    opacity: 0.9;
+  }
+
+  /* ───────── Cave ───────── */
+  .cave-tease {
+    padding-top: 0;
+    overflow: clip;
+  }
+  .rain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .cave-tease > :global(*:not(.rain)) {
+    position: relative;
+    z-index: 1;
+  }
+  .cave-wall {
+    min-height: 82vh;
+    display: grid;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  /* dim and lit copies sit in the same grid cell so the light lines up */
+  .cave-wall > .wrap {
+    width: 100%;
+    grid-area: 1 / 1;
+    display: grid;
+    align-content: center;
+  }
+  .cave-wall > :global(.t-lit) {
+    position: relative;
+    inset: auto;
+  }
+  .cw-text {
+    margin: 0;
+    font-size: clamp(44px, 12.4vw, 230px);
+    line-height: 0.86;
+    color: var(--fg);
+  }
+  .cw-text span {
+    display: block;
+    white-space: nowrap;
+  }
+  .cw-hint {
+    position: absolute;
+    left: var(--gutter);
+    bottom: 22px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    z-index: 2;
+  }
+  .cave-body {
+    padding-top: clamp(80px, 14vh, 160px);
+  }
+
+  .pu {
+    display: grid;
+    grid-template-columns: minmax(280px, 560px) 1fr;
+    gap: clamp(32px, 6vw, 96px);
+    align-items: center;
+    margin-bottom: clamp(100px, 16vh, 200px);
+  }
+  .pu-canvas-wrap {
+    aspect-ratio: 1;
+    width: 100%;
+  }
+  .pu-canvas-wrap canvas {
+    width: 100%;
+    height: 100%;
+  }
+  .pu-n {
+    font-size: clamp(80px, 12vw, 200px);
+    line-height: 0.85;
+    margin: 10px 0 20px;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .pu-sub {
+    max-width: 42ch;
+    color: var(--muted);
+    margin: 0 0 20px;
+  }
+  .pu-sub strong {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .pu-pace {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0;
+  }
+
+  .run {
+    display: grid;
+    gap: 32px;
+  }
+  .run-big {
+    margin: 8px 0 8px;
+    font-size: clamp(64px, 10vw, 168px);
+    line-height: 0.85;
+    font-variant-numeric: tabular-nums;
+  }
+  .run-big small {
+    font-size: 0.24em;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+  .run-meta {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+  .run-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(3px, 0.6vw, 8px);
+    height: clamp(120px, 20vw, 220px);
+    border-bottom: 1px solid var(--line);
+  }
+  .rb {
+    flex: 1;
+    height: calc(var(--h) * 100%);
+    min-height: 2px;
+    background: var(--accent);
+    transform-origin: bottom;
+    opacity: 0.88;
+  }
+
+  /* ───────── Responsive ───────── */
+  @media (max-width: 960px) {
+    .yrow {
+      grid-template-columns: 64px 1fr 24px;
+    }
+    .yr-key {
+      grid-column: 2 / 3;
+      grid-row: 2;
+    }
+    .yr-go {
+      grid-row: 1;
+      grid-column: 3;
+    }
+    .blue-grid,
+    .pu {
+      grid-template-columns: 1fr;
+    }
+    .fire {
+      position: static;
+    }
+    .folders {
+      grid-template-columns: 1fr;
+    }
+    .folder:nth-child(2),
+    .folder:nth-child(3) {
+      margin-top: 0;
+    }
+    .hero {
+      height: auto;
+      min-height: 100svh;
+    }
+    .hero-stats {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      padding-bottom: 84px; /* clear the elevator bar */
+    }
+    .hero-stats dt {
+      min-height: 2.7em; /* keep the numbers on one baseline */
+      font-size: 9px;
+      letter-spacing: 0.12em;
+      line-height: 1.35;
+    }
+    .hs-n {
+      font-size: clamp(30px, 9vw, 44px);
+    }
+    .hs-sub {
+      display: none;
+    }
+    .folder {
+      min-height: 0;
+      padding-bottom: 26px;
+    }
+  }
+  @media (max-width: 600px) {
+    .hero-top span:first-child {
+      display: none;
+    }
+    .hero-top {
+      justify-content: flex-start;
+    }
+  }
+</style>

@@ -1,0 +1,296 @@
+---
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import { projects } from '../../data/wayne';
+import { projectPages } from '../../data/projects';
+
+export function getStaticPaths() {
+  return projectPages.map((p, i) => ({
+    params: { slug: p.slug },
+    props: { page: p, prev: projectPages[(i + projectPages.length - 1) % projectPages.length], next: projectPages[(i + 1) % projectPages.length] },
+  }));
+}
+const { page, prev, next } = Astro.props;
+const meta = projects.find((p) => p.code === page.code)!;
+---
+
+<Base title={`${page.name} — Project Wayne`} floor="cave" theme="cave" description={meta.text}>
+  <PageHero floor="cave" face="display" eyebrow={page.kicker} title={page.name} lede={meta.text} rain>
+    <p class="back mono" data-pin><a href="/cave#projects">← Workshop · all projects</a></p>
+  </PageHero>
+
+  <section class="floor pj">
+    <div class="wrap pj-grid">
+      <article class="brief">
+        <p class="eyebrow">Brief · <span class="mono">{page.code}</span></p>
+        {page.intro.map((t, i) => <p class={i === 0 ? 'serif lead' : 'body'} data-reveal data-delay={i * 0.05}>{t}</p>)}
+      </article>
+
+      <aside class="sheet" data-reveal>
+        <div class="sh-head mono"><span>{page.code}</span><span class="sh-status">{meta.status}</span></div>
+        <dl>
+          {page.facts.map(([k, v]) => <div><dt class="mono">{k}</dt><dd>{v}</dd></div>)}
+        </dl>
+        {meta.progress !== undefined && (
+          <div class="sh-bar">
+            <span class="sh-track" aria-hidden="true"><span style={`--p:${meta.progress}`}></span></span>
+            <span class="mono">{meta.progressLabel}</span>
+          </div>
+        )}
+        <a class="src mono" href={page.source} target="_blank" rel="noopener">Original page ↗</a>
+      </aside>
+    </div>
+  </section>
+
+  {page.log && page.log.length > 0 && (
+    <section class="floor log">
+      <div class="wrap">
+        <header class="floor-head">
+          <span class="code">LOG</span>
+          <h2 class="display h-lg" data-split>{page.logTitle ?? 'Log'}</h2>
+        </header>
+        <ol class="entries">
+          {page.log.map((e, i) => (
+            <li class="entry" data-reveal data-delay={(i % 3) * 0.05}>
+              <div class="e-meta mono"><span class="e-date">{e.date}</span><span class="e-who">{e.who}</span></div>
+              <p>{e.text}</p>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </section>
+  )}
+
+  {page.notes && (
+    <section class="floor notes">
+      <div class="wrap">
+        <p class="eyebrow">Post-session notes · titles only. “These should not be used as instructionals.”</p>
+        <ul class="chips" data-reveal>
+          {page.notes.map((n) => <li class="mono">{n}</li>)}
+        </ul>
+      </div>
+    </section>
+  )}
+
+  <section class="floor pn">
+    <div class="wrap pn-grid">
+      <a class="pn-card" href={`/projects/${prev.slug}`}><span class="mono">← Previous</span><strong class="display">{prev.name}</strong></a>
+      <a class="pn-card pn-r" href={`/projects/${next.slug}`}><span class="mono">Next →</span><strong class="display">{next.name}</strong></a>
+    </div>
+  </section>
+
+  <script>
+    import '../../scripts/page';
+  </script>
+</Base>
+
+<style>
+  .back {
+    margin: 32px 0 0;
+    font-size: 12px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .back a {
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .back a:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  .pj-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.6fr) minmax(260px, 0.9fr);
+    gap: clamp(32px, 6vw, 96px);
+    align-items: start;
+  }
+  .brief .lead {
+    font-size: clamp(24px, 3vw, 38px);
+    line-height: 1.25;
+    margin: 18px 0 28px;
+  }
+  .brief .body {
+    max-width: 62ch;
+    color: var(--muted);
+    line-height: 1.7;
+    margin: 0 0 18px;
+  }
+  .sheet {
+    position: sticky;
+    top: calc(var(--nav-h) + 24px);
+    border: 1px solid var(--line);
+    padding: 20px 22px 22px;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+  }
+  .sh-head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .sh-status {
+    color: var(--accent);
+  }
+  .sheet dl {
+    margin: 0;
+  }
+  .sheet dl > div {
+    padding: 14px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .sheet dt {
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sheet dd {
+    margin: 4px 0 0;
+    font-size: 17px;
+  }
+  .sh-bar {
+    padding: 16px 0 4px;
+    display: grid;
+    gap: 8px;
+  }
+  .sh-bar .mono {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .sh-track {
+    display: block;
+    height: 4px;
+    background: var(--line);
+  }
+  .sh-track span {
+    display: block;
+    height: 100%;
+    width: calc(var(--p) * 100%);
+    background: var(--accent);
+  }
+  .src {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .entries {
+    list-style: none;
+    margin: 0;
+    padding: 0 0 0 28px;
+    position: relative;
+    max-width: 820px;
+  }
+  .entries::before {
+    content: '';
+    position: absolute;
+    left: 5px;
+    top: 8px;
+    bottom: 8px;
+    width: 1px;
+    background: var(--line);
+  }
+  .entry {
+    position: relative;
+    padding: 0 0 36px;
+  }
+  .entry::before {
+    content: '';
+    position: absolute;
+    left: -28px;
+    top: 5px;
+    width: 11px;
+    height: 11px;
+    border: 1px solid var(--accent);
+    background: var(--bg);
+  }
+  .e-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    font-size: 11px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .e-date {
+    color: var(--accent);
+  }
+  .e-who {
+    color: var(--muted);
+  }
+  .entry p {
+    margin: 10px 0 0;
+    line-height: 1.7;
+    max-width: 66ch;
+  }
+
+  .notes .chips {
+    list-style: none;
+    margin: 24px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .chips li {
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+  }
+
+  .pn-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .pn-card {
+    display: grid;
+    gap: 10px;
+    padding: 24px;
+    border: 1px solid var(--line);
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .pn-card:hover {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 6%, transparent);
+  }
+  .pn-card .mono {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .pn-card strong {
+    font-size: clamp(22px, 2.6vw, 34px);
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .pn-r {
+    text-align: right;
+  }
+  @media (max-width: 860px) {
+    .pj-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .sheet {
+      position: static;
+    }
+    .pn-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .pn-r {
+      text-align: left;
+    }
+  }
+</style>

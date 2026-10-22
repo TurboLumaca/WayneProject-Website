@@ -1,0 +1,188 @@
+---
+import Emblem from './Emblem.astro';
+import { channels } from '../data/wayne';
+---
+
+<footer class="signal" id="signal">
+  <div class="signal-beam" aria-hidden="true"></div>
+  <div class="wrap signal-inner">
+    <p class="eyebrow">Newsletter</p>
+    <h2 class="serif h-lg signal-title">Light the signal.</h2>
+    <p class="lede">Get every new case file, Monk Mode and video script by email, the day it goes up.</p>
+
+    <form class="signal-form" data-signal-form>
+      <label class="sr-only" for="signal-email">Email address</label>
+      <input id="signal-email" type="email" required placeholder="you@example.com" autocomplete="email" />
+      <button class="btn btn--solid" type="submit">
+        Light it <span class="arrow">→</span>
+      </button>
+    </form>
+    <p class="signal-note mono" data-signal-note aria-live="polite"></p>
+
+    <div class="signal-foot">
+      <div class="sf-brand">
+        <Emblem size={34} />
+        <div>
+          <strong>Project Wayne</strong>
+          <span>Exploring human potential through time management and discipline.</span>
+        </div>
+      </div>
+      <ul class="sf-channels">
+        {
+          channels.map((c) => (
+            <li>
+              <a href={c.href} target="_blank" rel="noopener">
+                <span>{c.name}</span>
+                <span class="mono">{c.handle}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+    <p class="sf-legal mono">Design prototype · All content from projectwayne.com · Not affiliated with DC</p>
+  </div>
+</footer>
+
+<style>
+  .signal {
+    --bg: #0a0a0b;
+    --fg: #e6e4df;
+    --muted: #8f8d88;
+    --line: rgba(230, 228, 223, 0.12);
+    --accent: #ffd400;
+    --accent-ink: #0a0a0b;
+    position: relative;
+    background: var(--bg);
+    color: var(--fg);
+    overflow: hidden;
+    padding-top: clamp(120px, 18vh, 220px);
+    padding-bottom: 40px;
+    border-top: 1px solid var(--line);
+  }
+  .signal-beam {
+    position: absolute;
+    left: 50%;
+    bottom: -10%;
+    width: 140vmax;
+    height: 160%;
+    transform-origin: 50% 100%;
+    transform: translateX(-50%) rotate(14deg) scaleY(0);
+    background: conic-gradient(from 174deg at 50% 100%, transparent 0deg, rgba(255, 236, 160, 0.16) 5deg, rgba(255, 246, 210, 0.3) 6deg, rgba(255, 236, 160, 0.16) 7deg, transparent 12deg);
+    filter: blur(6px);
+    pointer-events: none;
+    opacity: 0;
+  }
+  :global(.signal.lit) .signal-beam {
+    animation: beam 2.4s var(--ease-out) forwards;
+  }
+  @keyframes beam {
+    0% { opacity: 0; transform: translateX(-50%) rotate(-10deg) scaleY(0.2); }
+    15% { opacity: 1; }
+    100% { opacity: 1; transform: translateX(-50%) rotate(8deg) scaleY(1); }
+  }
+
+  .signal-inner {
+    position: relative;
+  }
+  .signal-title {
+    margin: 18px 0 20px;
+  }
+  .signal-form {
+    display: flex;
+    gap: 0;
+    margin-top: 40px;
+    max-width: 560px;
+    border: 1px solid var(--line);
+  }
+  .signal-form input {
+    flex: 1;
+    min-width: 0;
+    height: 56px;
+    padding: 0 18px;
+    background: transparent;
+    border: 0;
+    color: var(--fg);
+    font: inherit;
+    outline: none;
+  }
+  .signal-form input::placeholder {
+    color: #6c6a66;
+  }
+  .signal-form:focus-within {
+    border-color: var(--accent);
+  }
+  .signal-form .btn {
+    height: 56px;
+  }
+  .signal-note {
+    font-size: 12px;
+    color: var(--accent);
+    min-height: 1.5em;
+    margin-top: 14px;
+  }
+
+  .signal-foot {
+    margin-top: clamp(96px, 16vh, 180px);
+    padding-top: 28px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    gap: 40px;
+    flex-wrap: wrap;
+  }
+  .sf-brand {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    max-width: 360px;
+  }
+  .sf-brand :global(.emblem) {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .sf-brand strong {
+    display: block;
+    font-family: var(--f-mono);
+    font-size: 12px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .sf-brand span {
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .sf-channels {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 4px 28px;
+    flex: 1 1 320px;
+    min-width: 0;
+    max-width: 640px;
+  }
+  .sf-channels a {
+    display: flex;
+    flex-direction: column;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+    transition: border-color 0.3s;
+  }
+  .sf-channels a:hover {
+    border-color: var(--accent);
+  }
+  .sf-channels .mono {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .sf-legal {
+    margin-top: 40px;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #5c5a56;
+  }
+</style>

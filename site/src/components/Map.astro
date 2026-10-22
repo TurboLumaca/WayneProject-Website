@@ -1,0 +1,625 @@
+---
+import { floors } from '../data/wayne';
+
+// A cutaway of the whole property: Wayne Tower and Wayne Manor above ground,
+// the evidence room under the city, the cave under the manor.
+const pos: Record<string, { x: number; y: number; w: number; h: number }> = {
+  atrium: { x: 150, y: 74, w: 160, h: 58 },
+  record: { x: 120, y: 150, w: 220, h: 94 },
+  blueprint: { x: 120, y: 262, w: 220, h: 94 },
+  archive: { x: 580, y: 330, w: 300, h: 70 },
+  cases: { x: 90, y: 432, w: 260, h: 90 },
+};
+const cave = floors.find((f) => f.id === 'cave')!;
+const cavePos: Record<string, { x: number; y: number; w: number; h: number }> = {
+  training: { x: 470, y: 500, w: 200, h: 92 },
+  track: { x: 690, y: 500, w: 200, h: 92 },
+  workshop: { x: 470, y: 612, w: 200, h: 92 },
+  console: { x: 690, y: 612, w: 200, h: 92 },
+};
+
+// stalactites along the cave roof (seeded, stable)
+let s = 11;
+const r = () => ((s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296);
+const stal = Array.from({ length: 22 }, (_, i) => {
+  const x = 420 + i * 24 + r() * 8;
+  const y = 456 + Math.sin(i * 0.7) * 5;
+  const h = 10 + r() * 22;
+  return `M${x} ${y} L${x + 5} ${y + h} L${x + 10} ${y} Z`;
+});
+
+// distant city behind the tower and the manor
+const city: { x: number; y: number; w: number; h: number }[] = [];
+for (let x = 0; x < 1000; ) {
+  const w = 18 + r() * 34;
+  const h = 30 + Math.pow(r(), 1.5) * 150;
+  const inTower = x + w > 100 && x < 370;
+  const inManor = x + w > 545 && x < 915;
+  if (!inTower && !inManor) city.push({ x, y: 400 - h, w, h });
+  x += w + (r() > 0.6 ? 4 : 0);
+}
+const rain = Array.from({ length: 46 }, () => ({ x: r() * 1000, y: r() * 380, d: (r() * 1.4).toFixed(2), l: 8 + r() * 12 }));
+const fall = [924, 930, 937, 943];
+
+const wingColor = (w: string) => (w === 'batman' ? '#ffd400' : '#c9a45c');
+const payload = floors.map((f) => ({ id: f.id, code: f.code, name: f.name, fn: f.fn, href: f.href, wing: f.wing, ref: f.ref, mood: f.mood, blurb: f.blurb, rooms: f.rooms }));
+---
+
+<div class="map" data-map hidden>
+  <div class="map-backdrop" data-map-close></div>
+  <div class="map-box" role="dialog" aria-modal="true" aria-label="Building map">
+    <header class="map-head">
+      <div>
+        <p class="mh-eb">Wayne Tower · Wayne Manor · Gotham</p>
+        <h2 class="mh-t">The building</h2>
+      </div>
+      <ul class="legend" aria-hidden="true">
+        <li><i class="lg lg--bruce"></i> Bruce Wayne wing</li>
+        <li><i class="lg lg--batman"></i> Batman wing</li>
+        <li><i class="lg lg--here"></i> You are here</li>
+      </ul>
+      <p class="map-keys mono" aria-hidden="true">↑ ↓ move · ↵ ride</p>
+      <button class="map-x" data-map-close aria-label="Close the map">esc ✕</button>
+    </header>
+
+    <div class="map-body">
+      <div class="map-scroll" data-map-scroll>
+      <svg class="map-svg" viewBox="0 0 1000 760" role="group" aria-label="Cutaway of the building">
+        <defs>
+          <pattern id="mg" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="rgba(230,228,223,0.04)"></path></pattern>
+          <radialGradient id="moon"><stop offset="0" stop-color="#e8ecf5" stop-opacity="0.35"></stop><stop offset="1" stop-color="#e8ecf5" stop-opacity="0"></stop></radialGradient>
+          <linearGradient id="beam" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#ffd400" stop-opacity="0.5"></stop><stop offset="1" stop-color="#ffd400" stop-opacity="0"></stop></linearGradient>
+          <linearGradient id="mw" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#7ea0d8" stop-opacity="0.14"></stop><stop offset="1" stop-color="#7ea0d8" stop-opacity="0.04"></stop></linearGradient>
+        </defs>
+        <rect width="1000" height="760" fill="url(#mg)"></rect>
+
+        <!-- night sky: moon, city, rain, the signal from the roof -->
+        <circle cx="905" cy="70" r="40" fill="url(#moon)"></circle>
+        <circle cx="905" cy="70" r="16" fill="#d9dde6" opacity="0.5"></circle>
+        <g fill="rgba(230,228,223,0.05)">{city.map((b) => <rect x={b.x.toFixed(1)} y={b.y.toFixed(1)} width={b.w.toFixed(1)} height={b.h.toFixed(1)} />)}</g>
+        <path d="M230 28 L640 -20 L660 40 Z" fill="url(#beam)" class="m-searchlight"></path>
+        <g class="m-rain" stroke="rgba(190,205,230,0.18)">
+          {rain.map((d) => <line x1={d.x.toFixed(1)} y1={d.y.toFixed(1)} x2={(d.x - 3).toFixed(1)} y2={(d.y + d.l).toFixed(1)} style={`animation-delay:-${d.d}s`} />)}
+        </g>
+        <line x1="354" y1="398" x2="580" y2="398" stroke="rgba(201,164,92,0.35)" stroke-dasharray="6 6"></line>
+        <text x="420" y="390" class="m-note">THE DRIVE</text>
+
+        <!-- ground -->
+        <line x1="0" y1="400" x2="1000" y2="400" stroke="rgba(230,228,223,0.35)" stroke-width="1.5"></line>
+        <text x="16" y="394" class="m-note">GROUND</text>
+        <text x="16" y="420" class="m-note">UNDER THE CITY</text>
+
+        <!-- tower: antenna, lobby, shaft -->
+        <line x1="230" y1="74" x2="230" y2="30" stroke="#8f8d88"></line>
+        <circle cx="230" cy="28" r="3" fill="#ff4d3a" class="m-beacon"></circle>
+        <rect x="120" y="360" width="220" height="40" fill="none" stroke="rgba(230,228,223,0.3)" stroke-dasharray="3 4"></rect>
+        <text x="132" y="384" class="m-note">LOBBY</text>
+        <line x1="230" y1="132" x2="230" y2="150" stroke="rgba(230,228,223,0.3)" stroke-dasharray="3 3"></line>
+        <line x1="354" y1="74" x2="354" y2="520" stroke="rgba(255,212,0,0.4)" stroke-dasharray="2 5"></line>
+        <text x="362" y="92" class="m-note" fill="#ffd400">ELEVATOR</text>
+        <rect class="m-car" x="349" y="84" width="10" height="16" fill="#ffd400"></rect>
+
+        <!-- manor roof + study clock -->
+        <path d="M560 330 L730 250 L900 330 Z" fill="none" stroke="rgba(201,164,92,0.55)" stroke-width="1.5"></path>
+        <rect x="610" y="262" width="14" height="48" fill="none" stroke="rgba(201,164,92,0.45)"></rect>
+        <rect x="838" y="270" width="14" height="48" fill="none" stroke="rgba(201,164,92,0.45)"></rect>
+        <circle cx="730" cy="298" r="16" fill="none" stroke="#c9a45c" stroke-width="1.5"></circle>
+        <line x1="730" y1="298" x2="722" y2="292" stroke="#c9a45c" stroke-width="2"></line>
+        <line x1="730" y1="298" x2="740" y2="291" stroke="#c9a45c" stroke-width="1.4"></line>
+        <text x="755" y="302" class="m-note" fill="#c9a45c">THE CLOCK</text>
+        <g fill="#ffd400" opacity="0.55">
+          <rect x="598" y="314" width="8" height="10"></rect><rect x="640" y="314" width="8" height="10"></rect><rect x="812" y="314" width="8" height="10"></rect><rect x="854" y="314" width="8" height="10"></rect>
+        </g>
+        <g fill="rgba(201,164,92,0.25)">
+          <path d="M548 400 L560 352 L572 400 Z"></path><path d="M532 400 L541 366 L550 400 Z"></path><path d="M908 400 L920 350 L932 400 Z"></path><path d="M928 400 L937 370 L946 400 Z"></path>
+        </g>
+        <!-- the way down from the study -->
+        <line x1="680" y1="400" x2="680" y2="500" stroke="rgba(255,212,0,0.5)" stroke-dasharray="4 5"></line>
+        <path d="M672 478 L680 490 L688 478" fill="none" stroke="rgba(255,212,0,0.7)"></path>
+
+        <!-- cave -->
+        <path
+          d="M400 470 L470 452 L560 462 L640 448 L730 460 L820 446 L900 462 L952 500 L942 600 L962 680 L900 732 L780 744 L660 732 L540 746 L440 722 L398 640 L418 560 Z"
+          fill="rgba(255,212,0,0.035)" stroke="rgba(255,212,0,0.45)" stroke-width="1.5" stroke-linejoin="round"></path>
+        <g fill="rgba(255,212,0,0.35)">{stal.map((d) => <path d={d} />)}</g>
+        <path d="M400 706 Q430 698 460 706 T520 706 T580 706 T640 706 T700 706 T760 706 T820 706 T880 706 T940 706 L962 740 L398 740 Z" fill="url(#mw)" class="m-water"></path>
+        <text x="420" y="486" class="m-note" fill="#ffd400">UNDER THE MANOR</text>
+        <g class="m-fall" stroke="rgba(158,190,240,0.55)" stroke-width="1.6">
+          {fall.map((x, i) => <line x1={x} y1="470" x2={x} y2="704" style={`animation-delay:-${i * 0.17}s`} />)}
+        </g>
+        <ellipse cx="934" cy="708" rx="22" ry="5" fill="rgba(158,190,240,0.25)" class="m-splash"></ellipse>
+        <text x="878" y="462" class="m-note" fill="rgba(158,190,240,0.8)">FALLS</text>
+        <g stroke="rgba(255,212,0,0.28)" fill="none">
+          <rect x="262" y="446" width="76" height="16"></rect><rect x="262" y="466" width="76" height="16"></rect><rect x="262" y="486" width="76" height="16"></rect>
+        </g>
+        <!-- tunnel from the evidence room -->
+        <path d="M350 480 L400 520 L412 540" fill="none" stroke="rgba(255,212,0,0.45)" stroke-dasharray="4 4"></path>
+
+        <!-- floors -->
+        {
+          floors.filter((f) => pos[f.id]).map((f) => {
+            const p = pos[f.id];
+            const c = wingColor(f.wing);
+            return (
+              <a class="m-floor" data-map-floor={f.id} href={f.href} tabindex="0" aria-label={`${f.name}, ${f.fn}, floor ${f.code}`}>
+                <rect class="m-fill" x={p.x} y={p.y} width={p.w} height={p.h} fill={c} />
+                <rect class="m-edge" x={p.x} y={p.y} width={p.w} height={p.h} fill="none" stroke={c} stroke-width="1.4" />
+                <text class="m-code" x={p.x + 12} y={p.y + 22} fill={c}>{f.code}</text>
+                <text class="m-name" x={p.x + 12} y={p.y + 46}>{f.name}</text>
+                {p.h > 70 && <text class="m-fn" x={p.x + 12} y={p.y + 66}>{f.fn}</text>}
+                <g class="m-here" transform={`translate(${p.x + p.w - 16} ${p.y + 16})`}><circle r="4" fill="#ffd400"></circle><circle r="4" fill="none" stroke="#ffd400" class="m-ping"></circle></g>
+              </a>
+            );
+          })
+        }
+
+        <!-- the cave: one floor, four rooms -->
+        {
+          cave.rooms.map((rm) => {
+            const p = cavePos[rm.id];
+            return (
+              <a class="m-floor m-room" data-map-floor="cave" data-room={rm.id} href={`/cave${rm.anchor}`} tabindex="0" aria-label={`The Cave: ${rm.label}`}>
+                <rect class="m-fill" x={p.x} y={p.y} width={p.w} height={p.h} fill="#ffd400" />
+                <rect class="m-edge" x={p.x} y={p.y} width={p.w} height={p.h} fill="none" stroke="#ffd400" stroke-width="1.2" />
+                <text class="m-code" x={p.x + 12} y={p.y + 22} fill="#ffd400">B3</text>
+                <text class="m-name m-name--sm" x={p.x + 12} y={p.y + 50}>{rm.label}</text>
+                <text class="m-fn" x={p.x + 12} y={p.y + 72}>{rm.blurb.length > 30 ? rm.blurb.slice(0, 29) + '…' : rm.blurb}</text>
+                <g class="m-here" transform={`translate(${p.x + p.w - 16} ${p.y + 16})`}><circle r="4" fill="#ffd400"></circle><circle r="4" fill="none" stroke="#ffd400" class="m-ping"></circle></g>
+              </a>
+            );
+          })
+        }
+        <!-- route preview: drawn by the script from "you are here" to the hovered space -->
+        <path class="m-route" data-route d="M0 0" fill="none" stroke="#ffd400" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path>
+        <circle class="m-dot" data-route-dot r="5" cx="-20" cy="-20" fill="#fff6c2"></circle>
+      </svg>
+        <p class="map-pan mono" aria-hidden="true">← drag to explore →</p>
+      </div>
+
+      <aside class="map-panel" data-map-panel aria-live="polite">
+        <p class="mp-wing mono" data-mp-wing></p>
+        <h3 class="mp-name serif" data-mp-name></h3>
+        <p class="mp-fn mono" data-mp-fn></p>
+        <p class="mp-mood" data-mp-mood></p>
+        <p class="mp-route mono" data-mp-route></p>
+        <ul class="mp-rooms" data-mp-rooms></ul>
+        <p class="mp-ref mono" data-mp-ref></p>
+        <a class="btn btn--solid mp-go" data-mp-go href="/">Ride there <span class="arrow">→</span></a>
+      </aside>
+    </div>
+  </div>
+</div>
+<script type="application/json" id="pw-floors" set:html={JSON.stringify(payload)} />
+
+<style>
+  .map {
+    position: fixed;
+    inset: 0;
+    z-index: 86;
+    display: grid;
+    place-items: center;
+    padding: 16px;
+  }
+  .map[hidden] {
+    display: none;
+  }
+  .map-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 5, 6, 0.8);
+    backdrop-filter: blur(8px);
+  }
+  .map-box {
+    --m-bg: #0b0b0d;
+    --m-fg: #e6e4df;
+    --m-line: rgba(230, 228, 223, 0.12);
+    position: relative;
+    width: min(1180px, 100%);
+    max-height: calc(100svh - 32px);
+    overflow: auto;
+    background: var(--m-bg);
+    color: var(--m-fg);
+    border: 1px solid var(--m-line);
+    box-shadow: 0 40px 140px rgba(0, 0, 0, 0.7);
+  }
+  .map-head {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--m-line);
+    flex-wrap: wrap;
+  }
+  .mh-eb {
+    margin: 0;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #8f8d88;
+  }
+  .mh-t {
+    margin: 4px 0 0;
+    font-family: var(--f-serif);
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1;
+  }
+  .legend {
+    list-style: none;
+    margin: 0 0 0 auto;
+    padding: 0;
+    display: flex;
+    gap: 18px;
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8f8d88;
+    flex-wrap: wrap;
+  }
+  .lg {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+  .lg--bruce {
+    border: 1.5px solid #c9a45c;
+  }
+  .lg--batman {
+    background: #ffd400;
+  }
+  .lg--here {
+    border-radius: 50%;
+    background: #ffd400;
+    box-shadow: 0 0 0 3px rgba(255, 212, 0, 0.25);
+  }
+  .map-x {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #8f8d88;
+    border: 1px solid var(--m-line);
+    height: 34px;
+    padding: 0 12px;
+  }
+  .map-x:hover {
+    color: #fff;
+    border-color: #ffd400;
+  }
+
+  .map-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+  }
+  .map-svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    min-height: 0;
+  }
+  .map-panel {
+    border-left: 1px solid var(--m-line);
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .mp-wing {
+    margin: 0;
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .mp-wing::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    transform: rotate(45deg);
+    background: var(--wc, #c9a45c);
+  }
+  .mp-name {
+    margin: 4px 0 0;
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 0.95;
+  }
+  .mp-fn {
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8f8d88;
+  }
+  .mp-mood {
+    margin: 8px 0 0;
+    color: #c9c5bd;
+    font-size: 15px;
+  }
+  .mp-rooms {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0;
+    border-top: 1px solid var(--m-line);
+  }
+  .mp-rooms :global(a) {
+    display: grid;
+    gap: 2px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--m-line);
+    transition: padding 0.3s var(--ease-out), color 0.2s;
+  }
+  .mp-rooms :global(a:hover) {
+    padding-left: 8px;
+    color: #ffd400;
+  }
+  .mp-rooms :global(b) {
+    font-weight: 500;
+    font-size: 14px;
+  }
+  .mp-rooms :global(i) {
+    font-style: normal;
+    font-size: 12px;
+    color: #8f8d88;
+  }
+  .mp-ref {
+    margin: auto 0 0;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #6c6a66;
+    padding-top: 10px;
+  }
+  .mp-go {
+    --accent: #ffd400;
+    --accent-ink: #0a0a0b;
+    --fg: #e6e4df;
+    --bg: #0a0a0b;
+    --line: rgba(230, 228, 223, 0.2);
+    justify-content: space-between;
+  }
+
+  /* SVG styling */
+  .map-svg :global(.m-note) {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    fill: #6c6a66;
+  }
+  .map-svg :global(.m-code) {
+    font-family: var(--f-mono);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+  }
+  .map-svg :global(.m-name) {
+    font-family: var(--f-serif);
+    font-size: 24px;
+    fill: #e6e4df;
+  }
+  .map-svg :global(.m-name--sm) {
+    font-size: 21px;
+  }
+  .map-svg :global(.m-fn) {
+    font-family: var(--f-mono);
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    fill: #8f8d88;
+    text-transform: uppercase;
+  }
+  .map-svg :global(.m-fill) {
+    opacity: 0.05;
+    transition: opacity 0.3s;
+  }
+  .map-svg :global(.m-edge) {
+    opacity: 0.7;
+    transition: opacity 0.3s;
+  }
+  .map-svg :global(.m-floor) {
+    cursor: pointer;
+    outline: none;
+  }
+  .map-svg :global(.m-floor:hover .m-fill),
+  .map-svg :global(.m-floor:focus-visible .m-fill),
+  .map-svg :global(.m-floor.on .m-fill) {
+    opacity: 0.2;
+  }
+  .map-svg :global(.m-floor:hover .m-edge),
+  .map-svg :global(.m-floor:focus-visible .m-edge),
+  .map-svg :global(.m-floor.on .m-edge) {
+    opacity: 1;
+  }
+  .map-svg :global(.m-here) {
+    display: none;
+  }
+  .map-svg :global(.m-floor.here .m-here) {
+    display: block;
+  }
+  .map-svg :global(.m-ping) {
+    animation: ping 1.8s ease-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  .map-svg :global(.m-beacon) {
+    animation: blink 2.6s ease-in-out infinite;
+  }
+  @keyframes ping {
+    from { transform: scale(1); opacity: 0.9; }
+    to { transform: scale(3.4); opacity: 0; }
+  }
+  @keyframes blink {
+    0%, 100% { opacity: 0.25; }
+    50% { opacity: 1; }
+  }
+  .m-water {
+    animation: bob 5s ease-in-out infinite;
+  }
+  @keyframes bob {
+    50% { transform: translateY(3px); }
+  }
+
+  .mp-route {
+    margin: 4px 0 0;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #ffd400;
+    min-height: 1.4em;
+  }
+  .map-keys {
+    margin: 0;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: #6c6a66;
+  }
+  .map-svg :global(.m-route) {
+    stroke: #ffd400;
+    stroke-width: 2.4;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 6px rgba(255, 212, 0, 0.6));
+    pointer-events: none;
+  }
+  .map-svg :global(.m-dot) {
+    fill: #fff6c2;
+    filter: drop-shadow(0 0 8px #ffd400);
+    pointer-events: none;
+  }
+  .map-svg :global(.m-car) {
+    animation: car 9s ease-in-out infinite;
+  }
+  @keyframes car {
+    0%, 8% { transform: translateY(0); }
+    30%, 38% { transform: translateY(212px); }
+    60%, 68% { transform: translateY(384px); }
+    100% { transform: translateY(0); }
+  }
+  .map-svg :global(.m-rain line) {
+    animation: rain 1.4s linear infinite;
+  }
+  @keyframes rain {
+    from { transform: translateY(-20px); opacity: 0; }
+    20% { opacity: 1; }
+    to { transform: translateY(40px); opacity: 0; }
+  }
+  .map-svg :global(.m-fall line) {
+    stroke-dasharray: 10 14;
+    animation: fall 0.7s linear infinite;
+  }
+  @keyframes fall {
+    to { stroke-dashoffset: -24; }
+  }
+  .map-svg :global(.m-splash) {
+    animation: splash 1.2s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+  }
+  @keyframes splash {
+    50% { transform: scaleX(1.3); opacity: 0.5; }
+  }
+  .map-svg :global(.m-searchlight) {
+    transform-origin: 230px 28px;
+    animation: sweep 9s ease-in-out infinite alternate;
+  }
+  @keyframes sweep {
+    from { transform: rotate(-6deg); }
+    to { transform: rotate(5deg); }
+  }
+
+  .map-scroll {
+    position: relative;
+    min-width: 0;
+  }
+  .map-pan {
+    display: none;
+  }
+
+  @media (max-width: 860px) {
+    .map {
+      padding: 0;
+      place-items: stretch;
+    }
+    .map-box {
+      max-height: 100svh;
+      height: 100svh;
+      border: 0;
+    }
+    .map-head {
+      padding: 12px 16px;
+      gap: 12px;
+      flex-wrap: nowrap;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: var(--m-bg);
+    }
+    .mh-t {
+      font-size: 22px;
+    }
+    .legend {
+      display: none;
+    }
+    .map-x {
+      margin-left: auto;
+    }
+    /* the drawing keeps a readable scale; swipe sideways to pan */
+    .map-scroll {
+      overflow-x: auto;
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+      border-bottom: 1px solid var(--m-line);
+    }
+    .map-scroll::-webkit-scrollbar {
+      display: none;
+    }
+    .map-svg {
+      width: 620px;
+      max-width: none;
+    }
+    .map-pan {
+      display: block;
+      position: sticky;
+      left: 0;
+      margin: -26px 0 0;
+      padding: 0 16px 8px;
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #6c6a66;
+      pointer-events: none;
+    }
+    .mp-name {
+      font-size: 32px;
+    }
+    .map-keys {
+      display: none;
+    }
+    .map-body {
+      grid-template-columns: 1fr;
+    }
+    .map-panel {
+      border-left: 0;
+      border-top: 1px solid var(--m-line);
+    }
+    .legend {
+      margin-left: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .map-svg :global(.m-car),
+    .map-svg :global(.m-rain line),
+    .map-svg :global(.m-fall line),
+    .map-svg :global(.m-splash),
+    .map-svg :global(.m-searchlight),
+    .map-svg :global(.m-ping),
+    .map-svg :global(.m-beacon),
+    .m-water {
+      animation: none;
+    }
+  }
+</style>

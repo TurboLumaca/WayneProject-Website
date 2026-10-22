@@ -1,0 +1,513 @@
+---
+import Base from '../layouts/Base.astro';
+import { projects, pullups, running, tools, caveWall } from '../data/wayne';
+import { slugForCode } from '../data/projects';
+
+const max = Math.max(...running.months.map((m) => m[1]));
+const mname = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const label = (ym: string) => {
+  const [y, m] = ym.split('-').map(Number);
+  return m === 1 || ym === running.months[0][0] ? `${mname[m - 1]} ’${String(y).slice(2)}` : '';
+};
+const best = running.months.reduce((a, b) => (b[1] > a[1] ? b : a));
+---
+
+<Base title="The Cave — Project Wayne" floor="cave" theme="cave">
+  <section class="cave-hero torch" data-torch data-phero>
+    <canvas class="hero-rain" data-rain aria-hidden="true"></canvas>
+    <div class="wrap t-dim" aria-hidden="true">
+      <p class="eyebrow ch-eb"><span class="ch-code">B3</span> Live data, straight from the spreadsheets</p>
+      <h1 class="display ch-title">{caveWall.map((l) => <span>{l}</span>)}</h1>
+    </div>
+    <div class="wrap t-lit">
+      <p class="eyebrow ch-eb"><span class="ch-code">B3</span> Live data, straight from the spreadsheets</p>
+      <h1 class="display ch-title" data-ptitle>{caveWall.map((l) => <span>{l}</span>)}</h1>
+    </div>
+    <span class="ch-hint mono" aria-hidden="true">Move to shine a light</span>
+  </section>
+
+  <section class="floor" id="pullups">
+    <div class="wrap pu">
+      <div class="pu-canvas-wrap" data-reveal>
+        <canvas data-pu-canvas aria-label="A grid of 10,000 dots. Each row of 100 is one daily set of pull-ups."></canvas>
+        <span class="pu-key mono">1 dot = 1 pull-up · 1 row = 100 = one daily set</span>
+      </div>
+      <div class="pu-copy">
+        <p class="eyebrow">Project Feynman · The record attempt</p>
+        <h2 class="display h-lg">World record in pull-ups</h2>
+        <p class="pu-n display"><span data-pu-count>0</span><small>/ 10,000</small></p>
+        <p class="pu-sub">{pullups.quote}</p>
+        <p class="pu-sub">
+          As of {pullups.since} he was training 100 a day, with a PR of all 100 in <strong>{pullups.pr}</strong>. The current world record is closer to 9,000. To beat it he’d need about 10,000 in 24 hours: {pullups.pace}, 100 every 14:41.
+        </p>
+        <dl class="pu-facts">
+          <div><dt class="eyebrow">Daily</dt><dd class="display">{pullups.daily}</dd></div>
+          <div><dt class="eyebrow">Target</dt><dd class="display">10K</dd></div>
+          <div><dt class="eyebrow">Pace</dt><dd class="display">6.94<small>/min</small></dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="floor run" id="running">
+    <div class="wrap">
+      <header class="floor-head">
+        <span class="code">RUN</span>
+        <h2 class="display h-lg" data-split>Running log</h2>
+        <p class="eyebrow">Jul 2024 — Aug 2026 · monthly miles</p>
+      </header>
+
+      <div class="run-top">
+        <p class="run-big display"><span data-count={running.totalMiles} data-dec="1">{running.totalMiles}</span><small>miles</small></p>
+        <dl class="run-facts">
+          <div><dt class="eyebrow">Runs logged</dt><dd class="display" data-count={running.runs}>{running.runs}</dd></div>
+          <div><dt class="eyebrow">Longest</dt><dd class="display">{running.longest}<small>mi</small></dd></div>
+          <div><dt class="eyebrow">Best month</dt><dd class="display">{best[1]}<small>mi</small></dd></div>
+          <div><dt class="eyebrow">5-mile PR</dt><dd class="display">{running.fiveMilePR}</dd></div>
+        </dl>
+      </div>
+
+      <div class="chart" data-chart role="img" aria-label="Bar chart of miles run per month from July 2024 to August 2026">
+        <div class="bars">
+          {
+            running.months.map(([m, v]) => (
+              <div class="bar-col">
+                <span class="bar-v mono">{Math.round(v)}</span>
+                <span class="bar" style={`--h:${(v / max).toFixed(3)}`}></span>
+                <span class="bar-l mono">{label(m)}</span>
+              </div>
+            ))
+          }
+        </div>
+      </div>
+      <p class="chart-note mono">Source: public running sheet. Gaps (Feb 2026) are real. The log notes a bout of COVID.</p>
+    </div>
+  </section>
+
+  <section class="floor" id="projects">
+    <div class="wrap">
+      <header class="floor-head">
+        <span class="code">08</span>
+        <h2 class="display h-lg" data-split>Active projects</h2>
+        <p class="eyebrow">Bars appear only where the site gives a real number</p>
+      </header>
+      <div class="pgrid">
+        {
+          projects.map((p, i) => (
+            <a class="proj" id={`p-${p.code}`} href={slugForCode(p.code) ? `/projects/${slugForCode(p.code)}` : p.href} {...(slugForCode(p.code) ? {} : { target: '_blank', rel: 'noopener' })} data-reveal data-delay={(i % 4) * 0.06}>
+              <span class="p-top">
+                <span class="p-code mono">{p.code}</span>
+                <span class={`p-status mono s-${p.status.toLowerCase().replace(/\s/g, '-')}`}>{p.status}</span>
+              </span>
+              <h3 class="display">{p.name}</h3>
+              <p>{p.text}</p>
+              {p.progress !== undefined && (
+                <span class="p-bar">
+                  <span class="p-bar-t" aria-hidden="true"><span style={`--p:${p.progress}`}></span></span>
+                  <span class="mono p-bar-l">{p.progressLabel}</span>
+                </span>
+              )}
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="floor system" id="system">
+    <div class="wrap">
+      <header class="floor-head">
+        <span class="code">OS</span>
+        <h2 class="display h-lg" data-split>CEO by day, vigilante by night</h2>
+        <p class="eyebrow">Time management</p>
+      </header>
+      <div class="sys">
+        <p class="sys-text serif" data-reveal>
+          How far can someone push time management, and how close to Bruce Wayne’s level is possible in real life? He runs a company, patrols the roofs, learns new skills, keeps an Olympic-level body, solves cases and still keeps the persona.
+        </p>
+        <ul class="tools" data-reveal>
+          {tools.map((t) => <li class="mono">{t}</li>)}
+        </ul>
+      </div>
+      <div class="next" data-reveal>
+        <a class="enter-link" href="/"><span class="code">L42</span> Ride back up to the roof →</a>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import '../scripts/page';
+    import { gsap, ScrollTrigger, initTorch, reduce } from '../scripts/core';
+    import { pullGrid } from '../scripts/viz';
+
+    initTorch(document.querySelector<HTMLElement>('[data-torch]')!);
+
+    const grid = pullGrid(document.querySelector<HTMLCanvasElement>('[data-pu-canvas]')!);
+    const count = document.querySelector('[data-pu-count]')!;
+    const setPu = (p: number) => {
+      grid.set(p);
+      count.textContent = grid.count.toLocaleString('en-US');
+    };
+    if (reduce) setPu(0.42);
+    else
+      ScrollTrigger.create({ trigger: '#pullups', start: 'top 70%', end: 'bottom 40%', scrub: 0.5, onUpdate: (s) => setPu(s.progress) });
+
+    const bars = document.querySelectorAll('.bar');
+    if (!reduce) {
+      gsap.set(bars, { scaleY: 0 });
+      gsap.to(bars, { scaleY: 1, duration: 1.2, ease: 'expo.out', stagger: 0.03, scrollTrigger: { trigger: '[data-chart]', start: 'top 80%', once: true } });
+      gsap.utils.toArray<HTMLElement>('.p-bar-t span').forEach((el) => {
+        gsap.fromTo(el, { scaleX: 0 }, { scaleX: 1, duration: 1.6, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 92%', once: true } });
+      });
+    }
+  </script>
+</Base>
+
+<style>
+  .cave-hero {
+    min-height: 92svh;
+    display: grid;
+    padding-bottom: clamp(40px, 8vh, 88px);
+    padding-top: calc(var(--nav-h) + 40px);
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  .cave-hero > .wrap {
+    width: 100%;
+  }
+  .hero-rain {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 3;
+  }
+  .ch-eb {
+    margin: 0 0 24px;
+    display: flex;
+    gap: 14px;
+    align-items: center;
+  }
+  .ch-code {
+    color: var(--accent);
+    border: 1px solid currentColor;
+    padding: 5px 7px 4px;
+    letter-spacing: 0.16em;
+  }
+  .ch-title {
+    margin: 0;
+    font-size: clamp(50px, 11.6vw, 220px);
+    line-height: 0.86;
+  }
+  .ch-title span {
+    display: block;
+    white-space: nowrap;
+  }
+  .ch-hint {
+    position: absolute;
+    right: calc(var(--gutter) + var(--rail));
+    top: calc(var(--nav-h) + 24px);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    z-index: 2;
+  }
+  /* dim and lit copies share one grid cell so the light lines up */
+  .cave-hero > .wrap {
+    grid-area: 1 / 1;
+    align-self: end;
+  }
+  .cave-hero > :global(.t-lit) {
+    position: relative;
+    inset: auto;
+  }
+
+  /* Pull-ups */
+  .pu {
+    display: grid;
+    grid-template-columns: minmax(300px, 640px) 1fr;
+    gap: clamp(32px, 6vw, 112px);
+    align-items: center;
+  }
+  .pu-canvas-wrap {
+    display: grid;
+    gap: 12px;
+  }
+  .pu-canvas-wrap canvas {
+    aspect-ratio: 1;
+    width: 100%;
+  }
+  .pu-key {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .pu-copy {
+    display: grid;
+    gap: 16px;
+    align-content: center;
+  }
+  .pu-copy h2 {
+    margin: 0;
+  }
+  .pu-n {
+    margin: 6px 0;
+    font-size: clamp(76px, 11vw, 190px);
+    line-height: 0.85;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .pu-n small,
+  .run-big small,
+  .run-facts small,
+  .pu-facts small {
+    font-size: 0.26em;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+    margin-left: 0.3em;
+  }
+  .pu-sub {
+    margin: 0;
+    max-width: 48ch;
+    color: var(--muted);
+  }
+  .pu-sub strong {
+    color: var(--fg);
+    font-weight: 500;
+  }
+  .pu-facts,
+  .run-facts {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    gap: 28px;
+    justify-content: start;
+    margin: 12px 0 0;
+  }
+  .pu-facts dd,
+  .run-facts dd {
+    margin: 6px 0 0;
+    font-size: clamp(34px, 3.6vw, 56px);
+    line-height: 0.9;
+  }
+
+  /* Running */
+  .run-top {
+    display: flex;
+    gap: 40px 80px;
+    flex-wrap: wrap;
+    align-items: end;
+    margin-bottom: clamp(40px, 7vh, 80px);
+  }
+  .run-big {
+    margin: 0;
+    font-size: clamp(88px, 16vw, 280px);
+    line-height: 0.8;
+    font-variant-numeric: tabular-nums;
+  }
+  .run-facts {
+    grid-template-columns: repeat(4, auto);
+  }
+  .chart {
+    border-bottom: 1px solid var(--line);
+  }
+  .bars {
+    display: flex;
+    align-items: flex-end;
+    gap: clamp(3px, 0.7vw, 10px);
+    height: clamp(220px, 32vw, 400px);
+    padding-top: 28px;
+  }
+  .bar-col {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 6px;
+    position: relative;
+  }
+  .bar {
+    width: 100%;
+    height: calc(var(--h) * (100% - 44px));
+    min-height: 2px;
+    background: var(--accent);
+    opacity: 0.85;
+    transform-origin: bottom;
+    transition: opacity 0.25s;
+  }
+  .bar-col:hover .bar {
+    opacity: 1;
+  }
+  .bar-v {
+    font-size: 10px;
+    color: var(--muted);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+  .bar-col:hover .bar-v {
+    opacity: 1;
+    color: var(--accent);
+  }
+  .bar-l {
+    height: 20px;
+    margin-bottom: -26px;
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+    letter-spacing: 0.06em;
+  }
+  .chart-note {
+    margin: 34px 0 0;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.06em;
+  }
+
+  /* Projects */
+  .pgrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  .proj {
+    background: var(--bg);
+    padding: 24px 22px 28px;
+    display: grid;
+    gap: 12px;
+    align-content: start;
+    min-height: 340px;
+    transition: background 0.4s;
+  }
+  .proj:hover {
+    background: var(--bg-2);
+  }
+  .proj:target {
+    outline: 1px solid var(--accent);
+    outline-offset: -1px;
+  }
+  .p-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .p-code {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+  }
+  .p-status {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border: 1px solid var(--line);
+    padding: 3px 6px 2px;
+    color: var(--muted);
+  }
+  .proj h3 {
+    margin: 16px 0 0;
+    font-size: clamp(30px, 2.6vw, 42px);
+    line-height: 0.95;
+  }
+  .proj p {
+    margin: 0;
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+  .p-bar {
+    align-self: end;
+    margin-top: auto;
+    padding-top: 14px;
+    display: grid;
+    gap: 8px;
+  }
+  .p-bar-t {
+    height: 4px;
+    background: var(--line);
+  }
+  .p-bar-t span {
+    display: block;
+    height: 100%;
+    width: calc(var(--p) * 100%);
+    min-width: 4px;
+    background: var(--accent);
+    transform-origin: left;
+  }
+  .p-bar-l {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* System */
+  .sys {
+    display: grid;
+    gap: 40px;
+    max-width: 1000px;
+  }
+  .sys-text {
+    margin: 0;
+    font-size: clamp(26px, 3.2vw, 50px);
+    line-height: 1.12;
+  }
+  .tools {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .tools li {
+    border: 1px solid var(--line);
+    padding: 8px 14px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+  }
+  .next {
+    margin-top: clamp(48px, 8vh, 96px);
+  }
+
+  @media (max-width: 1100px) {
+    .pgrid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 860px) {
+    .pu {
+      grid-template-columns: 1fr;
+    }
+    .run-facts {
+      grid-template-columns: repeat(2, auto);
+    }
+    .bar-v,
+    .bar-l:not(:empty) {
+      font-size: 9px;
+    }
+    .ch-hint {
+      display: none;
+    }
+    .cave-hero {
+      min-height: 64svh;
+    }
+  }
+  @media (max-width: 560px) {
+    .pgrid {
+      grid-template-columns: 1fr;
+    }
+    .proj {
+      min-height: 0;
+    }
+    .pu-facts {
+      gap: 20px;
+    }
+  }
+</style>

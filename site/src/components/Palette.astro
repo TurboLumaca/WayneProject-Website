@@ -1,0 +1,230 @@
+---
+import { slugForCode } from '../data/projects';
+import { floors, years, cases, projects, financeGuides, influences, research, phases } from '../data/wayne';
+
+// One flat index for the ⌘K "Wayne/OS" palette. Every entry points at a page
+// and an anchor so the elevator can ride there.
+const index = [
+  ...floors.map((f) => ({ t: `${f.name} — ${f.fn}`, s: `${f.code} · ${f.wing === 'batman' ? 'Batman' : 'Bruce Wayne'} wing · ${f.mood}`, k: 'Space', h: f.href, f: f.id })),
+  ...floors.flatMap((f) =>
+    f.rooms.filter((r) => r.anchor).map((r) => ({ t: r.label, s: `${f.name} · ${r.blurb}`, k: 'Room', h: `${f.href}${r.anchor}`, f: f.id }))
+  ),
+  ...years.flatMap((y) =>
+    y.items.map((it) => ({ t: it.text, s: `Year ${y.n} · ${y.span}`, k: 'Record', h: `/record#year-${y.n}`, f: 'record' }))
+  ),
+  ...phases.map((p) => ({ t: `Phase ${p.n}: ${p.name}`, s: p.tag, k: 'Blueprint', h: '/blueprint#phases', f: 'blueprint' })),
+  ...financeGuides.map((g) => ({ t: g.full, s: g.text, k: 'Finance', h: '/blueprint#guides', f: 'blueprint' })),
+  ...research.map((r) => ({ t: r.name, s: r.text, k: 'Research', h: '/blueprint#research', f: 'blueprint' })),
+  ...influences.map((i) => ({ t: i.name, s: i.why, k: 'Archive', h: '/archive#shelf', f: 'archive' })),
+  ...cases.map((c) => ({
+    t: `${c.title}`,
+    s: `Case ${String(c.no).padStart(3, '0')} · ${c.date}${c.kind === 'monk' ? ' · Monk Mode' : c.kind === 'script' ? ' · Video script' : ''}`,
+    k: 'Case',
+    h: `/cases#case-${c.no}`,
+    f: 'cases',
+  })),
+  ...projects.map((p) => ({ t: p.name, s: `${p.code} · ${p.status}`, k: 'Project', h: slugForCode(p.code) ? `/projects/${slugForCode(p.code)}` : `/cave#p-${p.code}`, f: 'cave' })),
+  { t: 'The Forum', s: 'Latest posts and reader feedback', k: 'Space', h: '/forum', f: 'archive' },
+  { t: 'Pull-up record grid', s: '10,000 dots, one per rep', k: 'Data', h: '/cave#pullups', f: 'cave' },
+  { t: 'Running log', s: '1,819.5 miles · 531 runs', k: 'Data', h: '/cave#running', f: 'cave' },
+];
+---
+
+<div class="palette" data-palette hidden>
+  <div class="palette-backdrop" data-palette-close></div>
+  <div class="palette-box" role="dialog" aria-modal="true" aria-label="Search Project Wayne">
+    <div class="palette-head">
+      <span class="ph-os">WAYNE/OS</span>
+      <span class="ph-prompt">›</span>
+      <input
+        type="text"
+        data-palette-input
+        placeholder="Search cases, years, projects…"
+        autocomplete="off"
+        spellcheck="false"
+        role="combobox"
+        aria-expanded="true"
+        aria-controls="palette-list"
+        aria-autocomplete="list"
+      />
+      <kbd data-palette-close>esc</kbd>
+    </div>
+    <ul class="palette-list" id="palette-list" role="listbox" data-palette-list></ul>
+    <div class="palette-foot">
+      <span><kbd>↑</kbd><kbd>↓</kbd> move</span>
+      <span><kbd>↵</kbd> ride the elevator</span>
+      <span><kbd>1</kbd>–<kbd>6</kbd> floors</span>
+      <span class="pf-count" data-palette-count></span>
+    </div>
+  </div>
+</div>
+<script type="application/json" id="pw-index" set:html={JSON.stringify(index)} />
+
+<style>
+  .palette {
+    position: fixed;
+    inset: 0;
+    z-index: 85;
+    display: grid;
+    place-items: start center;
+    padding: 14vh 16px 16px;
+  }
+  .palette[hidden] {
+    display: none;
+  }
+  .palette-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(5, 5, 6, 0.72);
+    backdrop-filter: blur(6px);
+  }
+  .palette-box {
+    --p-bg: #0e0e10;
+    --p-fg: #e6e4df;
+    --p-line: rgba(230, 228, 223, 0.1);
+    position: relative;
+    width: min(680px, 100%);
+    background: var(--p-bg);
+    color: var(--p-fg);
+    border: 1px solid var(--p-line);
+    box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 212, 0, 0.06);
+    font-family: var(--f-mono);
+  }
+  .palette-box::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 3px);
+    pointer-events: none;
+  }
+  .palette-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 16px;
+    height: 60px;
+    border-bottom: 1px solid var(--p-line);
+  }
+  .ph-os {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: #ffd400;
+  }
+  .ph-prompt {
+    color: #ffd400;
+  }
+  .palette-head input {
+    flex: 1;
+    background: none;
+    border: 0;
+    outline: none;
+    color: inherit;
+    font: inherit;
+    font-size: 15px;
+    caret-color: #ffd400;
+  }
+  .palette-head input::placeholder {
+    color: #6c6a66;
+  }
+  kbd {
+    font: inherit;
+    font-size: 10px;
+    border: 1px solid var(--p-line);
+    padding: 2px 5px;
+    color: #8f8d88;
+    cursor: default;
+  }
+  .palette-head kbd {
+    cursor: pointer;
+  }
+
+  .palette-list {
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    max-height: min(56vh, 460px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .palette-list :global(li) {
+    display: grid;
+    grid-template-columns: 74px 1fr auto;
+    gap: 14px;
+    align-items: center;
+    padding: 10px 12px;
+    cursor: pointer;
+    border-left: 2px solid transparent;
+  }
+  .palette-list :global(li[aria-selected='true']) {
+    background: rgba(255, 212, 0, 0.07);
+    border-left-color: #ffd400;
+  }
+  .palette-list :global(.pi-kind) {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #8f8d88;
+  }
+  .palette-list :global(.pi-t) {
+    font-family: var(--f-sans);
+    font-size: 15px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .palette-list :global(.pi-s) {
+    font-size: 11px;
+    color: #8f8d88;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .palette-list :global(mark) {
+    background: none;
+    color: #ffd400;
+  }
+  .palette-list :global(.pi-go) {
+    font-size: 11px;
+    color: #ffd400;
+    opacity: 0;
+  }
+  .palette-list :global(li[aria-selected='true'] .pi-go) {
+    opacity: 1;
+  }
+  .palette-list :global(.pi-empty) {
+    display: block;
+    padding: 28px 12px;
+    color: #8f8d88;
+    cursor: default;
+  }
+
+  .palette-foot {
+    display: flex;
+    gap: 18px;
+    padding: 10px 16px;
+    border-top: 1px solid var(--p-line);
+    font-size: 10px;
+    color: #8f8d88;
+    flex-wrap: wrap;
+  }
+  .pf-count {
+    margin-left: auto;
+  }
+  @media (max-width: 600px) {
+    .palette {
+      padding-top: 10vh;
+    }
+    .palette-list :global(li) {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+    .palette-list :global(.pi-go) {
+      display: none;
+    }
+    .palette-foot span:not(.pf-count) {
+      display: none;
+    }
+  }
+</style>

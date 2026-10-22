@@ -1,0 +1,31 @@
+---
+// Original mark: a clock face with the hands at 10:10. Time management is the
+// whole project, and the open hands read as a raised signal without using any
+// DC symbol.
+interface Props {
+  size?: number;
+  class?: string;
+}
+const { size = 28, class: cls = '' } = Astro.props;
+const ticks = Array.from({ length: 12 }, (_, i) => i * 30);
+---
+
+<svg class={`emblem ${cls}`} width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
+  <circle cx="20" cy="20" r="18.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle>
+  {
+    ticks.map((a) => (
+      <line
+        x1="20"
+        y1="3.6"
+        x2="20"
+        y2={a % 90 === 0 ? 7.4 : 5.6}
+        stroke="currentColor"
+        stroke-width={a % 90 === 0 ? 1.6 : 1}
+        transform={`rotate(${a} 20 20)`}
+      />
+    ))
+  }
+  <line x1="20" y1="20" x2="11.5" y2="15.1" stroke="currentColor" stroke-width="2.6" stroke-linecap="square"></line>
+  <line x1="20" y1="20" x2="31" y2="13.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="square"></line>
+  <circle cx="20" cy="20" r="2" fill="currentColor"></circle>
+</svg>

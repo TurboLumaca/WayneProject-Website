@@ -1,0 +1,130 @@
+---
+// Procedural skyline, seeded so it is identical on every build. Two layers:
+// a far, hazy one and a near, black one with a few lit windows. One tower on
+// the right is taller than the rest. No DC artwork: just rectangles.
+const W = 1600;
+function rng(seed: number) {
+  let s = seed;
+  return () => ((s = (s * 1664525 + 1013904223) % 4294967296) / 4294967296);
+}
+
+function layer(seed: number, minH: number, maxH: number, minW: number, maxW: number, windows: boolean) {
+  const r = rng(seed);
+  const rects: { x: number; y: number; w: number; h: number }[] = [];
+  const wins: { x: number; y: number; k: number }[] = [];
+  const spires: string[] = [];
+  let x = -20;
+  while (x < W + 20) {
+    const w = minW + r() * (maxW - minW);
+    const h = minH + Math.pow(r(), 1.6) * (maxH - minH);
+    rects.push({ x, y: 400 - h, w, h });
+    if (r() > 0.78) {
+      // stepped crown
+      const cw = w * 0.5;
+      const ch = 12 + r() * 26;
+      rects.push({ x: x + (w - cw) / 2, y: 400 - h - ch, w: cw, h: ch });
+    }
+    if (r() > 0.88) {
+      const cx = x + w / 2;
+      spires.push(`M${cx - 1.5} ${400 - h} L${cx} ${400 - h - 30 - r() * 40} L${cx + 1.5} ${400 - h} Z`);
+    }
+    if (windows) {
+      for (let wy = 400 - h + 12; wy < 392; wy += 14) {
+        for (let wx = x + 7; wx < x + w - 8; wx += 12) {
+          if (r() > 0.93) wins.push({ x: wx, y: wy, k: r() });
+        }
+      }
+    }
+    x += w + (r() > 0.7 ? 3 + r() * 6 : 0);
+  }
+  return { rects, wins, spires };
+}
+
+const far = layer(7, 70, 210, 28, 64, false);
+const near = layer(23, 40, 150, 34, 84, true);
+// A taller tower in the right third (Wayne Tower, in spirit)
+const tower = { x: 1180, w: 74, h: 262 };
+---
+
+<div class="skyline" aria-hidden="true" data-skyline>
+  <svg class="sky far" data-sky-far viewBox={`0 0 ${W} 400`} preserveAspectRatio="xMidYMax slice">
+    <g fill="#0d0e11">
+      {far.rects.map((b) => <rect x={b.x.toFixed(1)} y={b.y.toFixed(1)} width={b.w.toFixed(1)} height={b.h.toFixed(1)} />)}
+      {far.spires.map((d) => <path d={d} />)}
+    </g>
+  </svg>
+  <svg class="sky near" data-sky-near viewBox={`0 0 ${W} 400`} preserveAspectRatio="xMidYMax slice">
+    <g fill="#050506">
+      {near.rects.map((b) => <rect x={b.x.toFixed(1)} y={b.y.toFixed(1)} width={b.w.toFixed(1)} height={b.h.toFixed(1)} />)}
+      {near.spires.map((d) => <path d={d} />)}
+      <rect x={tower.x} y={400 - tower.h} width={tower.w} height={tower.h} />
+      <rect x={tower.x + 14} y={400 - tower.h - 26} width={tower.w - 28} height="26" />
+      <rect x={tower.x + 30} y={400 - tower.h - 62} width={tower.w - 60} height="36" />
+      <path d={`M${tower.x + tower.w / 2 - 1.5} ${400 - tower.h - 62} L${tower.x + tower.w / 2} ${400 - tower.h - 130} L${tower.x + tower.w / 2 + 1.5} ${400 - tower.h - 62} Z`} />
+    </g>
+    <g fill="#ffd400">
+      {near.wins.map((w) => <rect class="win" x={w.x.toFixed(1)} y={w.y.toFixed(1)} width="5" height="6" style={`--o:${(0.25 + w.k * 0.55).toFixed(2)};--d:${(w.k * 9).toFixed(1)}s`} />)}
+      {Array.from({ length: 9 }, (_, i) => <rect class="win" x={tower.x + 14 + (i % 3) * 20} y={400 - tower.h + 30 + Math.floor(i / 3) * 52} width="6" height="8" style={`--o:0.7;--d:${i * 1.3}s`} />)}
+    </g>
+    <!-- red aviation light on the tower -->
+    <circle class="beacon" cx={tower.x + tower.w / 2} cy={400 - tower.h - 130} r="3" fill="#ff4d3a" />
+  </svg>
+  <span class="sky-fog"></span>
+</div>
+
+<style>
+  .skyline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: clamp(180px, 34vh, 360px);
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .sky {
+    position: absolute;
+    left: -3%;
+    right: -3%;
+    bottom: 0;
+    width: 106%;
+    height: 100%;
+    will-change: transform;
+  }
+  .far {
+    opacity: 0.9;
+    height: 86%;
+  }
+  .sky-fog {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 55%;
+    background: linear-gradient(to top, #07080a 4%, rgba(7, 8, 10, 0.55) 40%, transparent);
+  }
+  .win {
+    opacity: var(--o);
+    animation: win 7s ease-in-out infinite;
+    animation-delay: var(--d);
+  }
+  @keyframes win {
+    0%, 86%, 100% { opacity: var(--o); }
+    90% { opacity: 0; }
+    94% { opacity: var(--o); }
+  }
+  .beacon {
+    animation: beacon 2.6s ease-in-out infinite;
+    filter: drop-shadow(0 0 6px #ff4d3a);
+  }
+  @keyframes beacon {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 1; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .win, .beacon {
+      animation: none;
+    }
+  }
+</style>
