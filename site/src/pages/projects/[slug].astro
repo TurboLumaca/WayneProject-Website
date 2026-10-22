@@ -19,6 +19,10 @@ const meta = projects.find((p) => p.code === page.code)!;
     <p class="back mono" data-pin><a href="/cave#projects">← Workshop · all projects</a></p>
   </PageHero>
 
+  <figure class="banner" data-reveal>
+    <img src={page.img} alt={page.imgAlt} loading="eager" />
+  </figure>
+
   <section class="floor pj">
     <div class="wrap pj-grid">
       <article class="brief">
@@ -99,6 +103,27 @@ const meta = projects.find((p) => p.code === page.code)!;
   .back a:hover {
     color: var(--accent);
     border-color: var(--accent);
+  }
+  .banner {
+    margin: 0;
+    max-height: 56vh;
+    overflow: hidden;
+    position: relative;
+    border-bottom: 1px solid var(--line);
+  }
+  .banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 55%, var(--bg));
+  }
+  .banner img {
+    display: block;
+    width: 100%;
+    height: 56vh;
+    object-fit: cover;
+    object-position: 50% 30%;
+    filter: saturate(0.85) contrast(1.05);
   }
   .pj-grid {
     display: grid;

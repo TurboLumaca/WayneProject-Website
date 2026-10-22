@@ -13,6 +13,9 @@ const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join
     title="The Forum"
     lede="Notes from the build and what readers said back. Eight responses so far, one of them changed the design."
   />
+  <figure class="banner" data-reveal>
+    <img src="/img/batcave.jpg" alt="The Batcave computer, from the original site header" />
+  </figure>
 
   <section class="floor fm">
     <div class="wrap fm-grid">
@@ -20,7 +23,7 @@ const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join
         {
           forumPosts.map((p, i) => (
             <li class:list={['post', p.owner && 'is-owner', p.reply && 'is-reply']} data-reveal data-delay={(i % 3) * 0.05}>
-              <span class="avatar mono" aria-hidden="true">{initials(p.who)}</span>
+              <span class="avatar mono" aria-hidden="true">{p.owner ? <img src="/img/avatar.jpg" alt="" /> : initials(p.who)}</span>
               <div class="bubble">
                 <div class="meta mono">
                   <strong>{p.who}</strong>
@@ -54,6 +57,20 @@ const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join
 </Base>
 
 <style>
+  .banner {
+    margin: 0;
+    position: relative;
+    max-height: 40vh;
+    overflow: hidden;
+    border-bottom: 1px solid var(--line);
+  }
+  .banner img {
+    display: block;
+    width: 100%;
+    height: 40vh;
+    object-fit: cover;
+    filter: saturate(0.85);
+  }
   .fm-grid {
     display: grid;
     grid-template-columns: minmax(0, 1.7fr) minmax(240px, 0.7fr);
@@ -86,7 +103,13 @@ const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).slice(0, 2).join
     background: color-mix(in srgb, var(--fg) 4%, transparent);
     color: var(--muted);
   }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
   .is-owner .avatar {
+    overflow: hidden;
     border-color: var(--accent);
     color: var(--accent);
   }

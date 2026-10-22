@@ -17,6 +17,8 @@ export interface ProjectPage {
   logTitle?: string;
   notes?: string[]; // titles of post-session notes etc. (titles only)
   source: string;
+  img: string;
+  imgAlt: string;
 }
 
 /** Text taken from the original project pages; trimmed, never rewritten. */
@@ -39,6 +41,8 @@ export const projectPages: ProjectPage[] = [
     ],
     log: [],
     source: `${ORIGIN}/project-feynman/world-record-in-pull-ups/`,
+    img: '/img/pullups.jpg',
+    imgAlt: 'Bruce Wayne mid pull-up, from the original page',
   },
   {
     slug: 'real-estate',
@@ -62,6 +66,8 @@ export const projectPages: ProjectPage[] = [
       { date: 'March 30, 2025', who: 'Bruce Wayne', text: 'UPDATE 3/30/25 – Passed the real estate license exam a month or so ago. It’s useless at the moment, however. I’ve continued to put together some plans in the background to take advantage of the VA loan and 1031 exchanges to build my real estate portfolio. These should start to take effect in around March-April of 2026.' },
     ],
     source: `${ORIGIN}/real-estate/`,
+    img: '/img/batcave.jpg',
+    imgAlt: 'The Batcave computer, from the original site header',
   },
   {
     slug: 'certified-public-accountant',
@@ -85,6 +91,8 @@ export const projectPages: ProjectPage[] = [
       { date: '11/22/2023', who: 'Journal', text: 'Met with mentor – doesn’t think I can finish in one term. Fundamentals for Success in Business retaken: passed on the 4th attempt – just didn’t get what I was getting wrong. Sociology, Compensation and Benefits and Concepts in Marketing, Sales, and Consumer Contact all passed on retake.' },
     ],
     source: `${ORIGIN}/certified-public-accountant/`,
+    img: '/img/bruce.jpg',
+    imgAlt: 'Bruce Wayne in the films, from the original page',
   },
   {
     slug: 'b-s-computer-science',
@@ -108,6 +116,8 @@ export const projectPages: ProjectPage[] = [
       { date: 'September 4, 2024', who: 'Reader', text: 'Also, I think you’d be better of doing TESU instead of WGU for CS. TESU is a lot quicker and you actually graduate with a GPA which helps you out in case you ever decide to go to grad school.' },
     ],
     source: `${ORIGIN}/b-s-computer-science/`,
+    img: '/img/batcave.jpg',
+    imgAlt: 'The Batcave computer, from the original site header',
   },
   {
     slug: 'mma',
@@ -133,6 +143,8 @@ export const projectPages: ProjectPage[] = [
     ],
     notes: ['Sept 19th, 2025', 'Sept. 15th, 2025', 'Sept. 8th, 2025', 'Sept. 4th, 2025', 'Sept. 3rd, 2025', 'August 29th, 2025', 'August 28th, 2025', 'August 27th, 2025', 'August 26th, 2025', 'August 25th, 2025', 'August 22nd, 2025', 'August 21st, 2025', 'August 20th, 2025', 'August 19th, 2025', 'August 18th, 2025'],
     source: `${ORIGIN}/mma/`,
+    img: '/img/batcave.jpg',
+    imgAlt: 'The Batcave computer, from the original site header',
   },
   {
     slug: 'a-book-a-day',
@@ -149,6 +161,8 @@ export const projectPages: ProjectPage[] = [
       ['Inspired by', 'Elon Musk · Bobby Axelrod'],
     ],
     source: `${ORIGIN}/projects/listening-to-a-book-a-day/`,
+    img: '/img/watch.jpg',
+    imgAlt: 'Batman wearing his watch, from the original page',
   },
   {
     slug: 'project-feynman',
@@ -165,6 +179,8 @@ export const projectPages: ProjectPage[] = [
       ['Subdivision', 'World Record in Pull-Ups'],
     ],
     source: `${ORIGIN}/project-feynman/`,
+    img: '/img/batcave.jpg',
+    imgAlt: 'The Batcave computer, from the original site header',
   },
 ];
 
